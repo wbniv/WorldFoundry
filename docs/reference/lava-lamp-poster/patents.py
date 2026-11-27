@@ -10,7 +10,7 @@ PATENTS = [
     dict(key='GB703924', number='GB 703,924', url='https://patents.google.com/patent/GB703924A/en',
          title='A display device using liquid bubbles in another liquid', who='Donald Dunnet',
          dates='filed 1950-12-21 · published 1954-02-10',
-         what='a lamp heats the lower of two liquids; it rises in bubbles, cools and returns. The precursor'),
+         what='a lamp-heated liquid rises in bubbles through another, cools and returns'),
     dict(key='US3387396', number='US 3,387,396', url='https://patents.google.com/patent/US3387396A/en',
          title='Display devices', who='David George Smith, for Crestworth Ltd',
          dates='filed 1965-03-04 · granted 1968-06-11',
@@ -31,5 +31,5 @@ PATENTS = [
          title='Seeding a pseudo-random number generator with a hash of a digitized chaotic system',
          who='Noll, Mende and Sisodiya, for Silicon Graphics',
          dates='filed 1996-01-29 · granted 1998-03-24',
-         what='Lavarand: random numbers from pictures of lava lamps'),
+         what='Lavarand: random numbers from lava lamps'),
 ]

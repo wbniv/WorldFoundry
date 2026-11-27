@@ -11,6 +11,8 @@ What it pins:
     marked review draft builds (the reef poster's gate);
   * the committed poster.html, its SVG drawings and its QR codes are what the generators make now;
   * the model's numbers and the Forth words on the page are the level's: the words are found in the shipped .lev;
+  * no status tag is printed (Will, 2026-11-27): a sourced sentence ends in superscript source numbers;
+  * the Forth is pretty-printed with whitespace the only change from the shipped script;
   * type is at least 8 pt, SVG text contrast at least 4.5 : 1, numbers keep a non-breaking space before their unit,
     ISO dates use non-breaking hyphens, no 12-hour clock, nothing external, links are the sources and the patents;
   * the exported layout fits one A3 page and the PDF is one 297 x 420 mm page (skipped until exported).
@@ -160,12 +162,20 @@ def test_printed_numbers_are_the_model(page_text):
 
 
 def test_the_forth_on_the_poster_is_the_shipped_script(built):
+    """Pretty-printed, one definition per block: whitespace is the only change from the shipped director (Will,
+    2026-11-27); the stack effects and notes sit outside the code."""
     lev = LEV.read_text(encoding="utf-8", errors="replace")
-    pre = re.search(r'<pre class="code">(.*?)</pre>', built[0], re.S).group(1)
-    shown = htmllib.unescape(re.sub(r"<[^>]+>", "", pre)).splitlines()
-    assert shown == mp.forth_lines()
-    for ln in shown:
-        assert ln in lev, ln[:60]
+    blocks = re.findall(r'<pre class="code" data-word="([^"]+)">(.*?)</pre>', built[0], re.S)
+    assert [w for w, _ in blocks] == list(mp.FORTH_WORDS)
+    for (word, body), shipped in zip(blocks, mp.forth_lines()):
+        printed = htmllib.unescape(body)
+        assert "<" not in body, word
+        assert " ".join(printed.split()) == shipped, word
+        assert shipped in lev, word
+        assert len(printed.splitlines()) > 1, f"{word} is not pretty-printed"
+        assert max(len(x) for x in printed.splitlines()) <= mp.CODE_COLS, word
+    pretty = mp.pretty(": t 1 if 2 else 3 then 4 5 write-mailbox ;")
+    assert pretty == [": t", "  1 if", "    2", "  else", "    3", "  then", "  4 5 write-mailbox", ";"], pretty
 
 
 # ── type and text ────────────────────────────────────────────────────────────
@@ -201,10 +211,21 @@ def test_the_html_is_self_contained_and_links_only_sources(built):
     assert {s["url"] for s in mp.SOURCES.values()} <= hrefs
 
 
-def test_every_chip_in_use_is_in_the_legend(built):
+def test_no_status_tag_is_printed_and_sources_are_numbered(built):
+    """Will (2026-11-27): no printed verified / ours tags. The statuses stay the build gate; on the page a sourced
+    sentence ends in its superscript source numbers and the footer says an unnumbered sentence is ours."""
     doc = built[0]
-    for s in mp.used_statuses():
-        assert f'<span class="lg"><span class="chip {s}">{mp.STATUS_TEXT[s]}</span>' in doc
+    page = " ".join(text_nodes(doc))
+    assert 'class="chip' not in doc
+    for tag in ("verified", "other source", "ours (measured)", "design (ours)", "schematic (ours)"):
+        assert tag not in page.lower().replace(NBSP, " "), tag
+    sourced = sum(1 for _, c in mp.all_claims() if c["src"])
+    assert doc.count('<sup class="ref">') == sourced
+    num = {s: i + 1 for i, s in enumerate(mp.source_order())}
+    for _, c in mp.all_claims():
+        if c["src"]:
+            assert f'{mp.polish(c["text"])}<sup class="ref">{",".join(str(num[s]) for s in c["src"])}</sup>' in doc, c["text"][:40]
+    assert "a sentence without one is ours" in page
 
 
 # ── the exported page ────────────────────────────────────────────────────────

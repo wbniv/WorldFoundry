@@ -14,7 +14,7 @@
 
 
 
-- [verify T3] **Lava lamp A3 poster (Phase P).** Built 2026‑11‑27 as a marked review draft (7 panels, 32 claims, 6 patents with QR codes, the Cycles hero, the level's Forth); `task poster-lava-lamp`, 16 tests pass. Left: Will's visual review, then set "Poster visual review: approved" in docs/reference/lava-lamp-research.md, rebuild without `--draft` and run verification 10. [Plan](docs/plans/2026-11-26-lava-lamp.md#poster-record-2026-11-27)
+- [verify T3] **Lava lamp A3 poster (Phase P).** Built 2026‑11‑27 as a marked review draft; second layout after Will's first review (no status tags, Forth pretty-printed in a tall column); `task poster-lava-lamp`, 16 tests pass. Left: Will's visual review of the second layout, then set "Poster visual review: approved" in docs/reference/lava-lamp-research.md, rebuild without `--draft` and run verification 10. [Plan](docs/plans/2026-11-26-lava-lamp.md#poster-record-2026-11-27)
 
 - [T4] **Persist level settings across launches.** Plan written, **awaiting Will's review** (D1–D12, Q1–Q7): one engine-owned per-package store, keyed by level id + schema + field key, saved on Apply and applied at level load for the app and the Dream; Reset to defaults in the form. [Plan](docs/plans/2026-11-27-persist-level-settings.md). T4: crosses engine, every host and the level format. Background: [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)
 

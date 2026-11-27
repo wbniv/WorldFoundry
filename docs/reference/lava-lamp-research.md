@@ -8,6 +8,8 @@ Every claim carries one label:
 - **other source**: read, but about another lamp, and used only as stated;
 - **ours**: our level, our model or our design; a measured number names the script that computes it.
 
+The labels gate the poster's build; the printed page shows none of them (Will, 2026‑11‑27). There a sourced sentence ends in its superscript source number, and the footer says that a sentence without one is ours.
+
 What could not be confirmed is listed [at the end](#what-was-not-found-or-was-corrected) and is never printed.
 
 Poster visual review: pending (Will). Until Will approves and this line is changed to say so, `make_poster.py` builds only a marked review draft.

@@ -8,52 +8,52 @@
     "height": 1587.390625
   },
   "content_bottom_limit_px": 1557.154425,
-  "footer_last_bottom_px": 1547.234375,
+  "footer_last_bottom_px": 1549.234375,
   "footer_overflowing": false,
   "document_overflowing": false,
   "header_overflowing": false,
   "orphaned_header_refs": [],
   "panels": [
     {
+      "id": "panel-hero",
+      "clientHeight": 710,
+      "scrollHeight": 710,
+      "overflowing": false
+    },
+    {
       "id": "panel-moves",
-      "clientHeight": 288,
-      "scrollHeight": 288,
+      "clientHeight": 364,
+      "scrollHeight": 365,
       "overflowing": false
     },
     {
       "id": "panel-bottle",
-      "clientHeight": 252,
-      "scrollHeight": 252,
+      "clientHeight": 334,
+      "scrollHeight": 335,
       "overflowing": false
     },
     {
-      "id": "panel-hero",
-      "clientHeight": 548,
-      "scrollHeight": 548,
-      "overflowing": false
-    },
-    {
-      "id": "panel-patents",
+      "id": "panel-history",
       "clientHeight": 248,
       "scrollHeight": 248,
       "overflowing": false
     },
     {
-      "id": "panel-history",
-      "clientHeight": 194,
-      "scrollHeight": 194,
+      "id": "panel-patents",
+      "clientHeight": 320,
+      "scrollHeight": 320,
       "overflowing": false
     },
     {
       "id": "panel-forth",
-      "clientHeight": 246,
-      "scrollHeight": 246,
+      "clientHeight": 1074,
+      "scrollHeight": 1074,
       "overflowing": false
     },
     {
       "id": "panel-ways",
-      "clientHeight": 246,
-      "scrollHeight": 246,
+      "clientHeight": 216,
+      "scrollHeight": 216,
       "overflowing": false
     }
   ],
