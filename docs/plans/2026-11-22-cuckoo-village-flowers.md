@@ -240,6 +240,28 @@ Moved to its own plan: [Cuckoo Village flowers: level-of-detail model replacemen
 5. **The level builds with both versions.** `bash wflevels/cuckoo_village/build.sh` in the Blender container reports 88 actors (86 today plus `cottage_flowers` and `cottage_flower_blocks`) and the removed-triangle assertion holds (328).
 6. **The exported materials are as designed.** `cottage_flowers` has ten slots, none naming a texture, eight with flag 8 set; `cottage_flower_blocks` has the one atlas material.
 7. **The size is within the estimate.** `cuckoo_village-standalone.iff` is at most 0.75 MB larger than the 4,982,784 bytes it is today.
+
+    **Size gate re-set (proposed 2026‑11‑27), awaiting Will's decision.** The step above stays as written; it is the spec. Its limit is 4,982,784 + 750,000 = 5,732,784 bytes (the Results table reads "MB" as 10⁶ bytes). The committed level is 8,787,968 bytes, so **step 7 fails today by 3,055,184 bytes**, of which the flowers' own build is 5,712. No test enforces a size: `tests/test_clocks_bundle.py` only checks that the bundle's member equals the standalone file, and no other test reads the file's size.
+
+    Sizes read from git (`git show <rev>:wflevels/<file> | wc -c`); the breakdown is from the level's own asset map (`ASMP`) and its per-room `ASS` chunks, compared by asset name. Commits that left the level's size unchanged are folded into the row above them.
+
+    | Commit | Change | Plan | Level bytes | Change in bytes | What grew | Clocks bundle bytes |
+    |---|---|---|---|---|---|---|
+    | `52074c640` | merged into WF Clocks (then `f822bf99f` hands fix, `0f1d588a8` and `f955673e6` Christmas season: no size change) | [cuckoo village](2026-11-21-cuckoo-village.md) | 4,882,432 | | | 8,128,512 |
+    | `80f253ae9` | candles on the pines | [cuckoo village](2026-11-21-cuckoo-village.md) | 4,982,784 | +100,352 | `candle_sticks` 67,500; 12 `candle_flames` 28,560; level chunk +3,584 | 8,564,736 |
+    | `33b6d3b8f` | window boxes (**this plan**) | this plan | 5,738,496 | +755,712 | `cottage_flowers` 582,076; `cottage_flower_blocks` 183,548; `standard_house` −12,032 | 9,367,552 |
+    | `451d7adb4` | Bavaria mode | [cuckoo village](2026-11-21-cuckoo-village.md) | 5,906,432 | +167,936 | 4 more `tower_figure` 63,656; `bavaria_chalet` 45,860; `bavaria_trim` 24,264; maypole 14,172; two numeral sets 20,760; dome 7,628; `tower_case` −10,080 | 9,535,488 (`4d40f06f6`) |
+    | `60a3c5ae0` | Show framerate setting | none named | 5,910,528 | +4,096 | level chunk +2,988 | 9,504,768 |
+    | `6af3636d5` | candle flicker, Option A (then `ed0dfa839` checkbox settings: no size change) | [candle flicker](2026-11-22-cuckoo-village-candle-flicker.md) | 5,957,632 | +47,104 | 36 more `candle_flames` 35,760; level chunk +9,688 | 9,553,920 |
+    | `1b4f1b6f0` | Alpine hills, day/night sky, Houses and Trees settings (0–24 each), 24‑hour dial | [Alpine hills](2026-11-24-german-cuckoo-village-alpine-hills.md), [day/night](2026-11-24-german-cuckoo-village-day-night.md) | 8,787,968 | **+2,830,336** | permanent texture page 150 → 1,572,886 (+1,572,736, the sky dome's panoramas); flowers split into 24 per-site meshes 582,076 → 1,133,024 (+550,948); 24 per-site `cottage_blocks` 345,504, replacing `cottage_flower_blocks` (−183,548); 24 per-site `candle_sticks` +74,100; 48 more `candle_flames` +64,320; three sky domes 188,452; four 24‑hour dials 115,248; `alpine_foothills` 42,796; level chunk +58,116 | not repacked here; 30,908,416 at `7ed6d60c5`, the first pack holding this level (with 12 new clocks) |
+    | `f1a57fb91` | Forth `floor` word | [Forth math words](2026-11-26-forth-math-words.md) | 8,787,968 | 0 | level chunk −112, absorbed by the 2,048‑byte alignment | 30,910,464 (`4876fb206`); 29,929,472 now |
+
+    The [level-of-detail plan](2026-11-22-cuckoo-village-flowers-lod.md) has not started and has added nothing. Today the level is 29% of the Clocks bundle.
+
+    **Proposed figure: 9,437,184 bytes (9 MiB)**, 649,216 bytes (7.4%) above today's 8,787,968. Reason: the gate should pass today's content and catch the next unplanned jump like `1b4f1b6f0`'s, while leaving room for the one planned increase on file, the level-of-detail plan's own budget of 0.4 MB (criterion 4 of its decision rule), plus about 0.25 MB for small changes of the kind in the table (4 to 170 KB each, in 2,048‑byte blocks). Unbudgeted work, such as seasonal planting or the chalet's boxes, would then re-set the gate on purpose.
+
+    **Where it lives (proposed, not added):** a test, `tests/test_cuckoo_village_size.py`, asserting `(ROOT / 'wflevels/cuckoo_village-standalone.iff').stat().st_size <= 9_437_184` with a message naming this note, so a rebuild that crosses it fails `pytest` instead of waiting for someone to read this step. It is not added until Will picks the figure. The level-of-detail plan's criterion 4 ("the flowers plan's own gate still passes") and the [candle flicker](2026-11-22-cuckoo-village-candle-flicker.md) plan's step 4 ("the level-size gate is re-set and its figure recorded") wait on the same decision.
+
 8. **The bundle and launcher tests still pass.** `tests/test_clocks_bundle.py`, `test_launcher_parity.py`, `test_audit_level_settings.py`, `test_cuckoo_village_forth.py`, `test_cuckoo_village_candles.py`.
 9. **Both states show on cast1.** Build the Clocks APK, install it, and capture a frame near a cottage with the field Off (the blocks, as today) and On (petunias and edelweiss); the candles and window lights still work in both.
 10. **The profile, Off then On then Off.** The three `profile` runs described under Profiling, each 3 runs × 225 s on `chromecast-test-01` with the one APK; the three job numbers are recorded here.
