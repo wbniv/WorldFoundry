@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -427,6 +428,15 @@ public final class ScreensaverChooserActivity extends Activity {
         r.view.setPadding(dp(12), dp(7), dp(12), dp(7));
         r.view.setBackground(rowBackground());
         r.view.setOnClickListener(v -> choose(r.id));
+        // The ScrollView scrolls a row into view when it gains focus, before showPreviewFor makes its
+        // Preview visible; at a large font scale that adds a line, and the grown row would sit under the
+        // bottom fade. When the focused row's height changes, bring the whole row on screen again (the
+        // ScrollView's scroll-into-view leaves room for its fading edge).
+        r.view.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (v.hasFocus() && bottom - top != oldBottom - oldTop) {
+                v.requestRectangleOnScreen(new Rect(0, 0, v.getWidth(), v.getHeight()), false);
+            }
+        });
 
         r.radio = new RadioButton(this);
         r.radio.setClickable(false);
