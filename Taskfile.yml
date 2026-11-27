@@ -1823,6 +1823,12 @@ tasks:
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro -v "$order":/out wf-linux-test:local bash -c 'set -euo pipefail; cd /src/scripts && python3 -c "import runpy; print(chr(10).join(runpy.run_path(\"build-aquarium-screensaver-levels.py\", run_name=\"order\")[\"TANKS\"]))" > /out/bundle-order.txt; chmod a+r /out/bundle-order.txt'
         docker run --rm --ulimit core=0 -v "$PWD":/src:ro -v "$order":/order:ro wf-linux-test:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; javac -d /tmp/out "$d"/main/java/org/worldfoundry/screensaver/LevelCatalog.java "$d"/test/java/org/worldfoundry/screensaver/LevelCatalogTest.java && java -cp /tmp/out org.worldfoundry.screensaver.LevelCatalogTest /src/wflevels/aquarium-menu.manifest /order/bundle-order.txt && java -cp /tmp/out org.worldfoundry.screensaver.LevelCatalogTest /src/wflevels/clocks-menu.manifest'
 
+  test-screensaver-chooser:
+    desc: "The one 'use for screensaver' chooser for every pack (docs/plans/2026-11-27-screensaver-chooser.md): plain-Java ChooserModelTest (rows and save calls from any roster and setting id, Undo, a missing saved level, every shipped roster, and a source guard that the chooser names no pack), then the host pytest of which packs declare it (a roster of more than one level), its full-class-name settingsActivity and the providers' shared level calls. Repo mounted read-only."
+    cmds:
+      - docker run --rm --ulimit core=0 -v "$PWD":/src:ro wf-linux-test:local bash -c 'set -euo pipefail; d=/src/android/screensaver/src; j="$d"/main/java/org/worldfoundry/screensaver; javac -d /tmp/out "$j"/LevelCatalog.java "$j"/ChooserModel.java "$d"/test/java/org/worldfoundry/screensaver/ChooserModelTest.java && java -cp /tmp/out org.worldfoundry.screensaver.ChooserModelTest "$j" "$d"/main/res /src/wflevels/aquarium-menu.manifest /src/wflevels/clocks-menu.manifest'
+      - python3 -m pytest -q -rs tests/test_screensaver_chooser_metadata.py
+
   test-aquarium-launch-mode:
     desc: "LaunchMode (the one Aquarium app: tank menu on a normal launch, a tank for LEVEL, DREAM, the preview and the Dream) in plain Java: every row of docs/plans/2026-11-21-one-aquarium-app.md, an unknown LEVEL refused by the real catalogue, and source guards (the Dream and the preview never reach the menu; only the settings provider writes the saved tank). Repo mounted read-only."
     cmds:

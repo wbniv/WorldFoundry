@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-26](https://github.com/wbniv/WorldFoundry/commit/5a117e85d) | Screensaver Dreams declare their preview activity for Homeboard |
 | [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/7ed6d60c5) | Check in Aquarium and Clocks development build inputs |
 | [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/f59b5b8fa) | Capture Aquarium and Clocks rebuild inputs |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/95c2a96fd) | Aquarium: the applicationId becomes org.worldfoundry.game.aquarium (Will: the combined app is not called screensaver) |
@@ -28,6 +29,11 @@
 | [2026-10-18](https://github.com/wbniv/WorldFoundry/commit/54f44b515) | Add live aquarium screensaver with per-tank players |
 
 <!--history-meta v1
+5a117e85d	author	Will Norris
+5a117e85d	added	12
+5a117e85d	deleted	0
+5a117e85d	files	1
+5a117e85d	body	Each Dream <service> (Aquarium, Clocks, Seahorse Grid) gets PREVIEW_ACTIVITY\n(the full ScreensaverPreviewActivity class name); Aquarium and Seahorse Grid also\nPREVIEW_EXTRA/PREVIEW_VALUE (DREAM = aquarium / seahorse_grid), equal to the\ncoordinator registry. tests/test_screensaver_preview_metadata.py checks the\nmanifests, that the preview activity is exported, and the registry cross-check\n(skipped with a reason when the registry file is absent). README documents the keys.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQzN1oGqYJXjCkzVJ1
 7ed6d60c5	author	Will Norris
 7ed6d60c5	added	1
 7ed6d60c5	deleted	1

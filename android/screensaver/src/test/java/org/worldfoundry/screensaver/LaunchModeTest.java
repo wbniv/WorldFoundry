@@ -125,6 +125,10 @@ public final class LaunchModeTest {
                     "only the settings providers call LevelChoiceCalls, found " + callers);
             check(!activity.contains("getSharedPreferences") && !activity.contains("TankChoice.set"),
                     "LauncherActivity writes no preference");
+            String chooser = read(java.resolve("ScreensaverChooserActivity.java"));
+            check(!chooser.contains("getSharedPreferences") && !chooser.contains("TankChoice.")
+                            && !chooser.contains("LevelChoiceCalls."),
+                    "the screensaver chooser writes only through its pack's settings provider");
         }
 
         System.out.println(checks + " checks, " + failures + " failures");

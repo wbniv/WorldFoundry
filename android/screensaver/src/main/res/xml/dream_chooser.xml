@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Dream XML of a screensaver pack that offers the "use for screensaver" chooser: a pack whose
+     roster has more than one level (android/screensaver/README.md, "Choosing the screensaver").
+     settingsActivity is the full class name, never a leading '.' (Homeboard would join it with the
+     applicationId) and never package/class (Android ignores a component outside the Dream's package).
+     docs/plans/2026-11-27-screensaver-chooser.md. A one-level pack keeps the empty dream.xml. -->
+<dream xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="org.worldfoundry.screensaver.ScreensaverChooserActivity" />

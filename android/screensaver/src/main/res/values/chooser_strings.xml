@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The "use for screensaver" chooser (ScreensaverChooserActivity), shared by every screensaver pack:
+     no pack's own words here, so a new pack needs no strings. Level names come from the pack's roster.
+     Translations: values-th, values-es (drafts for a native reader). -->
+<resources>
+    <string name="chooser_title">Screensaver</string>
+    <string name="chooser_explain">Choose what the screensaver shows. A change applies from its next start.</string>
+    <plurals name="chooser_count">
+        <item quantity="one">%d choice</item>
+        <item quantity="other">%d choices</item>
+    </plurals>
+    <string name="chooser_saved">Saved</string>
+    <string name="chooser_preview">Preview</string>
+    <string name="chooser_undo">Undo</string>
+    <string name="chooser_hint_choose">Choose</string>
+    <string name="chooser_hint_use">Use for screensaver</string>
+    <string name="chooser_hint_preview">Preview</string>
+    <string name="chooser_hint_back">Done</string>
+    <string name="chooser_status_random">Nothing is chosen, so the screensaver picks one at random each time it starts. Choose one to keep it.</string>
+    <string name="chooser_status_saved">Saved. The screensaver shows %1$s from its next start.</string>
+    <string name="chooser_before">Before: %1$s.</string>
+    <string name="chooser_before_random">Before: one at random.</string>
+    <string name="chooser_status_undone">Undone. The screensaver shows %1$s again.</string>
+    <string name="chooser_status_undone_random">Undone. Nothing is chosen again, so the screensaver picks one at random.</string>
+    <string name="chooser_status_failed">Could not save. Nothing changed.</string>
+    <string name="chooser_missing">The saved choice (%1$s) is no longer in this app. The screensaver picks one at random until you choose.</string>
+    <string name="chooser_error_title">Could not read the screensaver settings</string>
+    <string name="chooser_error_body">Nothing was changed. Try again, or press Back to leave.</string>
+    <string name="chooser_retry">Try again</string>
+    <string name="chooser_close">Close</string>
+    <string name="chooser_row">%1$s, %2$d of %3$d</string>
+    <string name="chooser_row_saved">%1$s, saved, %2$d of %3$d</string>
+    <string name="chooser_preview_desc">Preview %1$s</string>
+    <string name="chooser_undo_desc">Undo: save %1$s again</string>
+    <string name="chooser_undo_desc_random">Undo: go back to one at random</string>
+</resources>

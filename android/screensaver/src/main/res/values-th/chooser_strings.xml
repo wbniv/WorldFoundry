@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Thai for values/chooser_strings.xml. Draft: to be read by a native speaker. -->
+<resources>
+    <string name="chooser_title">ภาพพักหน้าจอ</string>
+    <string name="chooser_explain">เลือกสิ่งที่จะแสดงเป็นภาพพักหน้าจอ การเปลี่ยนแปลงมีผลเมื่อเริ่มครั้งถัดไป</string>
+    <plurals name="chooser_count">
+        <item quantity="other">%d ตัวเลือก</item>
+    </plurals>
+    <string name="chooser_saved">บันทึกแล้ว</string>
+    <string name="chooser_preview">ดูตัวอย่าง</string>
+    <string name="chooser_undo">เลิกทำ</string>
+    <string name="chooser_hint_choose">เลือก</string>
+    <string name="chooser_hint_use">ใช้เป็นภาพพักหน้าจอ</string>
+    <string name="chooser_hint_preview">ดูตัวอย่าง</string>
+    <string name="chooser_hint_back">เสร็จ</string>
+    <string name="chooser_status_random">ยังไม่ได้เลือก ภาพพักหน้าจอจึงสุ่มแสดงทุกครั้งที่เริ่ม เลือกหนึ่งรายการเพื่อใช้ตลอด</string>
+    <string name="chooser_status_saved">บันทึกแล้ว ภาพพักหน้าจอจะแสดง %1$s ตั้งแต่ครั้งถัดไป</string>
+    <string name="chooser_before">ก่อนหน้า: %1$s</string>
+    <string name="chooser_before_random">ก่อนหน้า: สุ่ม</string>
+    <string name="chooser_status_undone">เลิกทำแล้ว ภาพพักหน้าจอจะแสดง %1$s เหมือนเดิม</string>
+    <string name="chooser_status_undone_random">เลิกทำแล้ว ยังไม่ได้เลือก ภาพพักหน้าจอจึงสุ่มแสดงเหมือนเดิม</string>
+    <string name="chooser_status_failed">บันทึกไม่ได้ ไม่มีอะไรเปลี่ยนแปลง</string>
+    <string name="chooser_missing">รายการที่บันทึกไว้ (%1$s) ไม่มีในแอปนี้แล้ว ภาพพักหน้าจอจะสุ่มแสดงจนกว่าคุณจะเลือก</string>
+    <string name="chooser_error_title">อ่านการตั้งค่าภาพพักหน้าจอไม่ได้</string>
+    <string name="chooser_error_body">ไม่มีอะไรเปลี่ยนแปลง ลองอีกครั้ง หรือกดย้อนกลับเพื่อออก</string>
+    <string name="chooser_retry">ลองอีกครั้ง</string>
+    <string name="chooser_close">ปิด</string>
+    <string name="chooser_row">%1$s, %2$d จาก %3$d</string>
+    <string name="chooser_row_saved">%1$s, บันทึกแล้ว, %2$d จาก %3$d</string>
+    <string name="chooser_preview_desc">ดูตัวอย่าง %1$s</string>
+    <string name="chooser_undo_desc">เลิกทำ: บันทึก %1$s อีกครั้ง</string>
+    <string name="chooser_undo_desc_random">เลิกทำ: กลับไปสุ่มแสดง</string>
+</resources>

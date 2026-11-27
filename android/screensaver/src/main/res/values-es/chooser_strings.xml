@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish for values/chooser_strings.xml. Draft: to be read by a native speaker. -->
+<resources>
+    <string name="chooser_title">Salvapantallas</string>
+    <string name="chooser_explain">Elige lo que muestra el salvapantallas. El cambio se aplica la próxima vez que se inicie.</string>
+    <plurals name="chooser_count">
+        <item quantity="one">%d opción</item>
+        <item quantity="other">%d opciones</item>
+    </plurals>
+    <string name="chooser_saved">Guardado</string>
+    <string name="chooser_preview">Vista previa</string>
+    <string name="chooser_undo">Deshacer</string>
+    <string name="chooser_hint_choose">Elegir</string>
+    <string name="chooser_hint_use">Usar como salvapantallas</string>
+    <string name="chooser_hint_preview">Vista previa</string>
+    <string name="chooser_hint_back">Listo</string>
+    <string name="chooser_status_random">No hay nada elegido, así que el salvapantallas elige uno al azar cada vez que se inicia. Elige uno para fijarlo.</string>
+    <string name="chooser_status_saved">Guardado. El salvapantallas mostrará %1$s desde su próximo inicio.</string>
+    <string name="chooser_before">Antes: %1$s.</string>
+    <string name="chooser_before_random">Antes: uno al azar.</string>
+    <string name="chooser_status_undone">Deshecho. El salvapantallas vuelve a mostrar %1$s.</string>
+    <string name="chooser_status_undone_random">Deshecho. Vuelve a no haber nada elegido, así que el salvapantallas elige uno al azar.</string>
+    <string name="chooser_status_failed">No se pudo guardar. No ha cambiado nada.</string>
+    <string name="chooser_missing">Lo guardado (%1$s) ya no está en esta aplicación. El salvapantallas elige uno al azar hasta que elijas.</string>
+    <string name="chooser_error_title">No se pudieron leer los ajustes del salvapantallas</string>
+    <string name="chooser_error_body">No ha cambiado nada. Inténtalo de nuevo o pulsa Atrás para salir.</string>
+    <string name="chooser_retry">Reintentar</string>
+    <string name="chooser_close">Cerrar</string>
+    <string name="chooser_row">%1$s, %2$d de %3$d</string>
+    <string name="chooser_row_saved">%1$s, guardado, %2$d de %3$d</string>
+    <string name="chooser_preview_desc">Vista previa de %1$s</string>
+    <string name="chooser_undo_desc">Deshacer: volver a guardar %1$s</string>
+    <string name="chooser_undo_desc_random">Deshacer: volver a uno al azar</string>
+</resources>

@@ -33,6 +33,32 @@ The Aquarium and Seahorse tasks build the level bundles in the Linux container w
 
 The selected Dream advertises `org.worldfoundry.game.aquarium.settings` (`${applicationId}.settings`). Its shell-only provider answers `getCapabilities` with a base64-encoded schema-1 JSON choice list and accepts `setSetting` with `tank:<id>` or `orientation:<value>`. The coordinator uses a reviewed mapping for this Dream package and authority, validates the response, and offers those choices in the KDE tray. A changed preference takes effect at the next Dream start.
 
+## Choosing the screensaver
+
+A person picks which tank or clock the screensaver plays in the app's own **chooser**, `ScreensaverChooserActivity` ([plan](../../docs/plans/2026-11-27-screensaver-chooser.md)). The Dream's XML names it as Android's `settingsActivity`, so Homeboard's **Open ‹app› settings** button and a phone's screensaver picker (the gear beside the screensaver) both open it. It lists the roster's levels by their Dream labels, with the saved one marked **Saved**. OK or a tap saves at once and offers **Undo** on that row until you leave; **Preview** plays a level once through `ScreensaverPreviewActivity` with `LEVEL=<id>`, saving nothing; Back leaves and keeps what is saved. There is no Random row (Will, 2026‑11‑27): with nothing chosen, the screensaver keeps drawing a random level each start, the list marks no row and says so, and Undo can go back to that. A saved level the roster no longer holds is named in a notice; the Dream plays a random level meanwhile, and the stored id is kept, so the choice returns if the level does. Its words are in English, Thai and Spanish (`src/main/res/values*/chooser_strings.xml`, drafts for a native reader); level names stay the manifest's English.
+
+**One chooser for every pack.** The activity and its logic (`ChooserModel`) name no pack: the rows are the pack's `levels.manifest` (`LevelCatalog`), the provider is the one its Dream declares in `org.worldfoundry.screensaver.SETTINGS_AUTHORITY`, and it reads and writes through the shared `level` calls every pack's provider answers through `LevelChoiceCalls`: `getLevel` (returns `level`, the choice in effect, and `stored`, the raw saved value) and `setSetting level:<id>`. The providers' own ids (`tank`, `clock`) and `getCapabilities` are unchanged, so the coordinator sees no difference. The chooser never touches SharedPreferences: `LevelChoiceCalls` is the only writer of the saved choice and only the settings providers call it (`LaunchModeTest`). It runs in its own `:chooser` process. `task test-screensaver-chooser` runs `ChooserModelTest` (including a guard that the chooser names no pack) and `tests/test_screensaver_chooser_metadata.py`.
+
+**Adding the chooser to a new pack.** A pack offers it when its roster has more than one level; a one-level pack (Seahorse Grid) keeps the empty `@xml/dream` and declares nothing. For a new pack `<flavor>`:
+
+1. The roster: `wflevels/<flavor>-menu.manifest`, copied into the flavor as `levels.manifest` by `build.gradle.kts` (as for `aquarium` and `clocks`). The test finds rosters by that name.
+2. The settings provider: answer the shared calls first in `call()`, after the caller check: `if (LevelChoiceCalls.handle(getContext(), method, arg, result)) return result;`. Declare it with `android:authorities="${applicationId}.settings"` and name the same authority in the Dream's `org.worldfoundry.screensaver.SETTINGS_AUTHORITY` meta-data.
+3. In `src/<flavor>/AndroidManifest.xml`, point the Dream at the chooser's XML and declare the activity:
+
+    ```xml
+    <meta-data android:name="android.service.dream" android:resource="@xml/dream_chooser" />
+    ```
+    ```xml
+    <activity android:name=".ScreensaverChooserActivity"
+        android:label="@string/chooser_title"
+        android:process=":chooser"
+        android:exported="true"
+        android:excludeFromRecents="true"
+        android:taskAffinity="" />
+    ```
+
+No Java and no strings are needed. `src/main/res/xml/dream_chooser.xml` names the activity by its full class name, never with a leading `.` (Homeboard would join it with the applicationId, which is not the code package) and never as `package/class` (Android ignores a component outside the Dream's own package).
+
 ## Preview metadata
 
 Beside `org.worldfoundry.screensaver.SETTINGS_AUTHORITY`, each Dream `<service>` (Aquarium, Clocks, Seahorse Grid; not Planted Tank or the spikes) declares how a companion such as Homeboard previews it. The contract is the screensaver companion contract (`docs/plans/2026-11-26-screensaver-companion-contract.md` in the homeboard-tv repo), "What each app declares"; the values equal the coordinator registry's `preview_activity`, `preview_extra` and `preview_value`.
@@ -83,7 +109,7 @@ The coordinator side is not done yet: its Seahorse Grid application entry has no
 - **One clock directly**: `adb shell am start -n org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity --es org.worldfoundry.screensaver.LEVEL minute_machine` (or `random`). An unknown id is logged and shown, and nothing starts. It is one run only; the saved choice is not changed. Back leaves the app (no chooser).
 - **Dream** (`ClocksDreamService`): the saved clock, default `random`, resolved once per run; never the chooser, and it never forwards keys (any key wakes it).
 - **Chooser test build**: from before the second clock, `task build-clocks-two-entry-apk` builds the same package with Minute Machine listed twice (throwaway manifest and bundle under `android/screensaver/build/clocks-two-entry/`, via `-PwfClocksManifest` and `-PwfClocksAssets`), so the chooser appears. It replaces the shipped app on a device; `task build-clocks-apk` rebuilds the shipped one.
-- **Settings** (`ClocksSettingsProvider`, shell only): `getCapabilities`, `getClock`, and `setSetting` with `clock:<id>`, `clock:random` or `orientation:<value>`. Only this provider writes the saved choice, so a preview never overwrites it.
+- **Settings** (`ClocksSettingsProvider`, shell only): `getCapabilities`, `getClock`, and `setSetting` with `clock:<id>`, `clock:random` or `orientation:<value>`, plus the shared `getLevel` and `setSetting level:<id>` the chooser uses. Only the provider writes the saved choice (the chooser writes through it), so a preview never overwrites it. See [Choosing the screensaver](#choosing-the-screensaver).
 
 ## Planted Tank
 
