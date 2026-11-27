@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/1539de805) | plan: one data-driven chooser for every WF screensaver bundle |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/8b8637c7a) | plan: Will decides the screensaver chooser (D4: no Random row) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+1539de805	author	Will Norris
+1539de805	added	21
+1539de805	deleted	0
+1539de805	files	1
+1539de805	body	Will: reuse the same chooser code for the Aquarium, WF Clocks and every\nfuture World Foundry screensaver bundle. The plan now says everything per-app\nis data (roster, provider authority, level setting id), a bundle with more\nthan one level declares it, adding it is a README how-to, and a source guard\nkeeps bundle names out of the chooser.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQzN1oGqYJXjCkzVJ1
 8b8637c7a	author	Will Norris
 8b8637c7a	added	10
 8b8637c7a	deleted	1

@@ -90,6 +90,8 @@ flowchart TD
 
 ### Critical files
 
+**As built (`820e29f6a`, `1323b23a4`, 2026‑11‑27):** the views are built in code, choosing the wide or stacked layout at run time, so there is no `layout/chooser.xml` or `layout-w720dp`; the list scrolls with faded edges instead of "▲ N more" lines; the shared calls live in `ChooserModel` and `LevelChoiceCalls` (now the only caller of `TankChoice.set`); both providers accept the shared `level` id beside `tank` and `clock`. Not yet built as an APK or run on a device.
+
 New:
 
 - `android/screensaver/src/main/java/org/worldfoundry/screensaver/ScreensaverChooserActivity.java`: the screen. Framework views only (no new dependency), `Theme.Material` dark, sizes in `dp` and `sp`. Reads on every `onResume` (so a coordinator change or a return from Preview shows), writes with `ContentResolver.call(<package>.settings, "setSetting", "<key>:<id>")`. Back calls `finish()`. A failed call shows the read-error screen or a "Could not save" status; nothing is guessed.
