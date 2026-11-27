@@ -14,8 +14,6 @@
 
 
 
-- [verify T3] **Lava lamp A3 poster (Phase P).** Built 2026‑11‑27 as a marked review draft; second layout after Will's first review (no status tags, Forth pretty-printed in a tall column); `task poster-lava-lamp`, 16 tests pass. Left: Will's visual review of the second layout, then set "Poster visual review: approved" in docs/reference/lava-lamp-research.md, rebuild without `--draft` and run verification 10. [Plan](docs/plans/2026-11-26-lava-lamp.md#poster-record-2026-11-27)
-
 - [T4] **Persist level settings across launches.** Plan written, **awaiting Will's review** (D1–D12, Q1–Q7): one engine-owned per-package store, keyed by level id + schema + field key, saved on Apply and applied at level load for the app and the Dream; Reset to defaults in the form. [Plan](docs/plans/2026-11-27-persist-level-settings.md). T4: crosses engine, every host and the level format. Background: [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)
 
 
@@ -260,6 +258,7 @@
 
 ## Done
 
+- ✅ 2026‑11‑27 — [lava-poster] Lava lamp A3 poster approved by Will ("poster ok"); lava-lamp-a3.pdf exported. See [plan](docs/plans/2026-11-26-lava-lamp.md#poster-record-2026-11-27).
 - ✅ 2026‑11‑27 — [candle-flames-a] Keep A (settled by Will 2026‑11‑22, confirmed 2026‑11‑27); B measured +1.39 ms on cast1. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
 - ✅ 2026‑11‑27 — [candle-ab] B measured on cast1: +1.39 ms CPU a frame over A; clips and near study made; camera aim resolved. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
 - ✅ 2026‑11‑27 — [cuckoo-size-gate] Gate re-set to 9 MiB (Will); enforced by a test; level 8.79 MB. See [plan](docs/plans/2026-11-22-cuckoo-village-flowers.md).
