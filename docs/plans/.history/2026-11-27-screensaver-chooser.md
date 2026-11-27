@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/69875b7a1) | plan: chooser step 6 partial on Cast1: notice and drawn clock pass; shipped reinstall refused |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/ce5f3ea8b) | plan: chooser step 5 partial: Cast1's Dream plays the saved clock |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/9146728df) | plan: chooser step 8 deferred; why the coordinator cannot drive Settings on the Pixel |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/a32e41531) | plan: chooser step 8: phone screensaver plays only while charging; no Random row; no uiautomator dump |
@@ -10,6 +11,11 @@
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+69875b7a1	author	Will Norris
+69875b7a1	added	20
+69875b7a1	deleted	0
+69875b7a1	files	1
+69875b7a1	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqP8zNDXFEqEEztS56o
 ce5f3ea8b	author	Will Norris
 ce5f3ea8b	added	12
 ce5f3ea8b	deleted	0

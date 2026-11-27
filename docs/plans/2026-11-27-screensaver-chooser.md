@@ -227,6 +227,26 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
     step 9 showed a chooser save reaching Homeboard's Preview. The Dream was already running when the job started,
     so no `LevelLaunch` line was captured. Not yet run: the key-by-key walk (Right to Preview, Back, Left), Undo,
     and a Dream started after a chooser save.
+
+    ```
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=homeboard-tv \
+        APK=artifacts/deployments/0.1.177/homeboard.apk RECIPE=dev/device/chooser-cast1-step5-walk.json   # J-3a4ac3e0e1a1
+      01 chooser from Homeboard: The Corolla Gauge [Saved], focused
+      02 Up ×16, Down ×5: Cuckoo Village focused      03 Right: its Preview focused
+      04 OK: …/ScreensaverPreviewActivity, Cuckoo Village drawn    05 Back: chooser, Preview on Cuckoo Village focused
+      06 Left: Cuckoo Village row   07 OK: [Saved]; "Saved. … Cuckoo Village … Before: The Corolla Gauge."
+      08–09 Right, Right: Undo focused   10 OK: "Undone. The screensaver shows The Corolla Gauge again."
+      13 Left, Left, OK: Cuckoo Village [Saved]       14 Back: Homeboard
+    $ task chromecast:screensaver:status DEVICE=chromecast-test-01      # J-ebdbcbf2a4ba
+            "value": "cuckoo_village",
+    $ task chromecast:screensaver:trigger DEVICE=chromecast-test-01 WAIT_MINUTES=14   # J-5ffd2ad10b22, 614 s
+      "active_component": "org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksDreamService", "running_state": "running"
+      screensaver.png: Cuckoo Village (the cuckoo tower among the houses)
+    ```
+
+    **PASS (2026‑11‑27).** Walk, Preview, Back, save, Undo and re-save all work by remote keys; the provider reports the
+    chooser's save; the Dream, started by Android's idle timer, plays it. "Repeat with Random" does not apply (D4: no
+    Random row). The preview's `LevelLaunch` line is not in the check's logcat, so the clock is identified from frames.
 6. Cast1, missing level: save `corolla_gauge`; install a throwaway WF Clocks built from a manifest without it (the `-PwfClocksManifest` route of `task build-clocks-two-entry-apk`); open the chooser: the notice and "Plays now" on Random; trigger the Dream: a clock is drawn; reinstall the shipped APK: Corolla Gauge is saved again with no notice.
 
     ```
@@ -248,6 +268,12 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
     level by its id because the label left with the roster. **Open:** reinstalling the shipped APK is refused three
     times with `install-over-foreground` (WF Clocks stays in front after HOME and BACK presses), so "Corolla Gauge
     saved again with no notice" is unverified, and **Cast1 still has the throwaway build installed.**
+
+    **Completed (2026‑11‑27):** after a coordinator `sleep` (`J‑a147159d9867`) the shipped APK reinstalled
+    (`J‑7e411e403685`, APK installed; launcher check cancelled). The chooser then opened with **The Corolla Gauge**
+    saved and no notice (frame 01 of step 5's `J‑3a4ac3e0e1a1`). Step 6 **PASS**, with the Dream-versus-preview
+    caveat above. Follow-up for the coordinator: HOME and BACK `press` jobs did not move WF Clocks' preview screen
+    out of the foreground, which blocked `install` with `install-over-foreground`.
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
 
