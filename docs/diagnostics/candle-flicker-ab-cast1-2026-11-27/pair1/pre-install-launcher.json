@@ -1,0 +1,8 @@
+{
+  "status": "captured",
+  "package": "org.worldfoundry.game.clocks",
+  "installed_sha256": "de55dc586abb076de8e1faf2d41db75287277851be008d177ef3b526e57334e8",
+  "labels": [
+    "WF Clocks"
+  ]
+}

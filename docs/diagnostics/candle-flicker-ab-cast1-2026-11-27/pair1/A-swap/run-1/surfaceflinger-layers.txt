@@ -1,0 +1,69 @@
+Display 0 name="Built-in Screen"#3
+WindowedMagnification:0:31#4
+HideDisplayCutout:0:14#5
+OneHanded:0:14#6
+FullscreenMagnification:0:12#7
+Leaf:0:1#8
+WallpaperWindowToken{cdeb055 token=android.os.Binder@1728a3f}#55
+4c34ec3 com.android.systemui.wallpapers.ImageWallpaper#58
+com.android.systemui.wallpapers.ImageWallpaper#59
+Wallpaper BBQ wrapper#60
+DefaultTaskDisplayArea#9
+Task=5554#89
+293f665 ActivityRecordInputSink com.android.tv.settings/.MainSettings#95
+ActivityRecord{530df3a u0 com.android.tv.settings/.MainSettings#90
+Task=5650#1375
+1e30393 ActivityRecordInputSink org.worldfoundry.coordinator.clockprobe/.ClockProbe#1380
+ActivityRecord{f717fd0 u0 org.worldfoundry.coordinator.clockprobe/.ClockProbe#1376
+aa488df org.worldfoundry.coordinator.clockprobe/org.worldfoundry.coordinator.clockprobe.ClockProbe#1377
+Task=5751#3944
+2553d5 ActivityRecordInputSink com.google.android.apps.tv.launcherx/.home.HomeActivity#3949
+ActivityRecord{b2dc7ea u0 com.google.android.apps.tv.launcherx/.home.HomeActivity#3945
+cc65062 com.google.android.apps.tv.launcherx/com.google.android.apps.tv.launcherx.home.HomeActivity#3946
+Task=5759#4081
+fa6a99c ActivityRecordInputSink org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity#4090
+ActivityRecord{c4befa5 u0 org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity#4082
+8eebb2a org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity#4083
+Background for SurfaceView[org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity]#4088
+SurfaceView[org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity]#4086
+SurfaceView[org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity](BLAST)#4087
+org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity#4084
+Bounds for - org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity#4085
+Leaf:3:12#10
+WindowToken{f3e243 type=2038 android.os.BinderProxy@dbe8fde}#47
+597c2a7 ShellDropTarget#48
+ImePlaceholder:13:14#11
+ImeContainer#12
+OneHanded:15:15#13
+FullscreenMagnification:15:15#14
+Leaf:15:15#15
+HideDisplayCutout:16:16#16
+OneHanded:16:16#17
+FullscreenMagnification:16:16#18
+Leaf:16:16#19
+OneHanded:17:17#20
+FullscreenMagnification:17:17#21
+Leaf:17:17#22
+HideDisplayCutout:18:23#23
+OneHanded:18:23#24
+FullscreenMagnification:18:23#25
+Leaf:18:23#26
+Leaf:24:25#27
+HideDisplayCutout:26:31#28
+OneHanded:26:31#29
+FullscreenMagnification:26:27#30
+Leaf:26:27#31
+Leaf:28:28#32
+FullscreenMagnification:29:31#33
+Leaf:29:31#34
+HideDisplayCutout:32:35#35
+OneHanded:32:32#36
+Leaf:32:32#37
+FullscreenMagnification:33:33#38
+Leaf:33:33#39
+OneHanded:34:35#40
+FullscreenMagnification:34:35#41
+Leaf:34:35#42
+Leaf:36:36#43
+Accessibility Overlays#45
+Display Overlays#44

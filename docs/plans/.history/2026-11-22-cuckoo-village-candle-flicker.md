@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/34c6f5ce0) | Cuckoo Village: size gate re-set to 9 MiB (Will), enforced by a test |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/6af3636d5) | Cuckoo Village: the candle flames flicker (Option A: four meshes a tree, two shapes a group, 24 two-sine rules) |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/021bb3c4f) | Candle flicker plan: judge the variants by eye (tree clips, a near study, a frame strip) as well as by profile |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/d56dc0951) | Candle flicker plan: measure with the engine's frame profile through variant-benchmark; the profile job cannot resolve a tenth of a millisecond at a locked 33.4 ms |
@@ -8,6 +9,11 @@
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/a35980cc5) | Plan: flickering candle flames (four meshes a tree, a clock-driven shape swap), with mockups and diagrams |
 
 <!--history-meta v1
+34c6f5ce0	author	Will Norris
+34c6f5ce0	added	1
+34c6f5ce0	deleted	1
+34c6f5ce0	files	1
+34c6f5ce0	body	Will accepted the proposed 9,437,184-byte gate after the size accounting in\nthe flowers plan (step 7). tests/test_cuckoo_village_size.py enforces it; the\nlevel is 8,787,968 bytes today.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 6af3636d5	author	Will Norris
 6af3636d5	added	28
 6af3636d5	deleted	1

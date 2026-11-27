@@ -1,0 +1,559 @@
+From d6946996341c0fcd34e1e008d001da3760e95e6b Mon Sep 17 00:00:00 2001
+From: Will Norris <will@biohack.net>
+Date: Fri, 27 Nov 2026 07:42:42 +0700
+Subject: [PATCH] Candle flicker A/B measurement builds (local measurement
+ branch; not for 2026-new-level)
+
+On 2026-new-level 149b91c9 (Option A shipped). CANDLE_FLAMES=deform ports Option B (candle-flicker-spike 3a446c2d) to
+today's 24-tree level; CANDLE_NIGHT_HOUR, CANDLE_ALL_YEAR, CANDLE_CAMERA_STILL hold night, lit candles and a still
+camera; CANDLE_STUDY(+_CANDLE, _DISTANCE) is the near-study camera, with the Player held so a Debug desktop run does
+not stop when it falls out of the room. scripts/capture-candle-study.py: a NaN clock reading no longer ends a step
+(test). With no CANDLE_ variables the build's .lev and actor map are byte-identical to the committed level.
+Plan: docs/plans/2026-11-22-cuckoo-village-candle-flicker.md.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
+---
+ scripts/capture-candle-study.py               | 145 ++++++++++++++++++
+ scripts/level-build.sh                        |   2 +-
+ tests/test_capture_candle_study.py            |  31 ++++
+ .../blender_create_cuckoo_village.py          |  37 ++++-
+ wflevels/cuckoo_village/build.sh              |   2 +
+ wflevels/cuckoo_village/flame_rig.py          | 107 +++++++++++++
+ wflevels/cuckoo_village/forth.py              |  72 ++++++++-
+ wflevels/cuckoo_village/timeline.py           |  15 ++
+ 8 files changed, 401 insertions(+), 10 deletions(-)
+ create mode 100644 scripts/capture-candle-study.py
+ create mode 100644 tests/test_capture_candle_study.py
+ create mode 100644 wflevels/cuckoo_village/flame_rig.py
+
+diff --git a/scripts/capture-candle-study.py b/scripts/capture-candle-study.py
+new file mode 100644
+index 000000000..dd51ecca3
+--- /dev/null
++++ b/scripts/capture-candle-study.py
+@@ -0,0 +1,145 @@
++#!/usr/bin/env python3
++"""Candle flicker spike: capture consecutive frames of a Cuckoo Village level on the desktop engine (plan docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
++
++Run inside the Linux container against the container-built dev engine, under xvfb:
++
++  WF_CONTAINER_ENV="WF_GAME=/build/wf-game-dev/src/engine/wf_game" scripts/in-linux-container.sh \\
++    bash -c 'xvfb-run -a -s "-screen 0 2048x1200x24" python3 scripts/capture-candle-study.py --level build/candle-spike/swap-study/cuckoo_village-standalone.iff --out OUTDIR'
++
++  --level FILE   a standalone level (a spike build: normal, or study with its fixed camera)
++  --out DIR      write frame-0000.png, frame-0001.png ... here
++  --frames N     consecutive frames to capture, one stepped frame apart (default 8; at -rate30 they are 1/30 s apart)
++  --warm N       frames to step first, for the camera and the first scan to settle (default 60)
++  --size WxH     window size (default 1280x720)
++  --clock SPEC   WF_WALL_CLOCK for the run (default 2026-12-25T22:00:00+07:00@0: in season, at night, frozen)
++  --step N       step N frames between captures (default 1)
++
++A study build's flicker follows the level clock, so the frames are deterministic. A normal build's follows the wall second, which the frozen
++clock holds still: use a study build for strips and clips.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import math
++import os
++import resource
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT / "tests"))
++from debug_bridge_client import BridgeClient  # noqa: E402
++
++WF_GAME = Path(os.environ.get("WF_GAME", ROOT / "engine" / "wf_game"))
++GAME_CWD = ROOT / "wfsource" / "source" / "game"
++TIME_MBX = 1906
++
++
++def stepped(start: float, now: float, frames: int, rate: float = 30.0) -> bool:
++    """True once the level clock has moved `frames` frames on from `start` (with 10 % slack). A missing reading (NaN) is never arrival:
++    before the fix a NaN start counted as arrived, so a 60-frame warm-up ended after one frame."""
++    return not math.isnan(start) and not math.isnan(now) and now >= start + frames / rate * 0.9
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--level", type=Path, required=True)
++    ap.add_argument("--out", type=Path, required=True)
++    ap.add_argument("--frames", type=int, default=8)
++    ap.add_argument("--warm", type=int, default=60)
++    ap.add_argument("--size", default="1280x720")
++    ap.add_argument("--clock", default="2026-12-25T22:00:00+07:00@0")
++    ap.add_argument("--step", type=int, default=1)
++    ap.add_argument("--probe", action="store_true", help="print the Camera, cs_wide and LookAt actors' position and rotation after the warm-up")
++    ap.add_argument("--port", type=int, default=7860)
++    ap.add_argument("--actor-map", type=Path, help="the level build's actor-map.json (default: the one beside --level, else wflevels/cuckoo_village/)")
++    args = ap.parse_args()
++    amap = args.actor_map or (args.level.parent / "actor-map.json")
++    if not amap.is_file():
++        amap = ROOT / "wflevels" / "cuckoo_village" / "actor-map.json"
++    indices_all = json.loads(amap.read_text())["indices"]
++    width, height = (int(v) for v in args.size.lower().split("x"))
++    out = args.out.resolve()
++    out.mkdir(parents=True, exist_ok=True)
++    env = os.environ.copy()
++    env["LD_LIBRARY_PATH"] = f"{ROOT / 'engine' / 'libs'}:{env.get('LD_LIBRARY_PATH', '')}"
++    env["LSAN_OPTIONS"] = "detect_leaks=0"
++    env["WF_WALL_CLOCK"] = args.clock
++    log = open(out / "engine.log", "w")
++    proc = subprocess.Popen([str(WF_GAME), f"-L{args.level.resolve()}", f"-width={width}", f"-height={height}", "-rate30",
++                             "--vram-width=4096", "--vram-height=2048", "--vram-slot-width=2048", "--vram-slot-height=2048",
++                             "--vram-perm-width=1024", "--vram-perm-height=1024",
++                             "--debug-port", str(args.port), "--debug-bind", "127.0.0.1"],
++                            cwd=str(GAME_CWD), env=env, stdout=log, stderr=subprocess.STDOUT,
++                            preexec_fn=lambda: resource.setrlimit(resource.RLIMIT_CORE, (0, 0)))
++    client = BridgeClient("127.0.0.1", args.port, timeout=60.0)
++    try:
++        client.send({"op": "pause"})
++
++        player = indices_all["Player"]
++        client.watch(idx=player, mailbox=TIME_MBX)
++
++        def clock() -> float:
++            with client._lock:
++                return client.mailbox_values.get((player, TIME_MBX), float("nan"))
++
++        def step(n: int) -> None:
++            start = clock()
++            client.send({"op": "step", "frames": n})
++            until = time.monotonic() + 120
++            while time.monotonic() < until:
++                if proc.poll() is not None:
++                    raise RuntimeError(f"engine exited; see {log.name}")
++                now = clock()
++                if stepped(start, now, n):
++                    return
++                time.sleep(0.01)
++            raise TimeoutError("frame step timed out")
++
++        def shot(path: Path) -> None:
++            client.send({"op": "screenshot", "filename": str(path)})
++            r = client.wait_for(lambda m: m.get("op") in ("screenshot_done", "error"), timeout=60)
++            if not r or r.get("op") != "screenshot_done":
++                raise RuntimeError(f"screenshot failed: {r}")
++
++        # The clock's first value arrives only after the first frame runs. step() used to return as soon as any value came when it had none
++        # to start from, so the whole warm-up was one frame and the camera was still easing in from the orbit when the frames were taken (the
++        # spike's 'picture 21 degrees right and 19 up of the written pose', 2026-11-22). Take one frame and wait for the first value first.
++        client.send({"op": "step", "frames": 1})
++        until = time.monotonic() + 120
++        while math.isnan(clock()):
++            if proc.poll() is not None or time.monotonic() > until:
++                raise RuntimeError(f"no level clock from the engine; see {log.name}")
++            time.sleep(0.01)
++        step(args.warm)
++        if args.probe:
++            indices = indices_all
++            for name in ("Camera", "cs_wide", "LookAt"):
++                for mb in (3009, 3010, 3011, 3012, 3013, 3014):
++                    client.watch(idx=indices[name], mailbox=mb)
++            step(1)
++            for name in ("Camera", "cs_wide", "LookAt"):
++                with client._lock:
++                    vals = [client.mailbox_values.get((indices[name], mb), float("nan")) for mb in (3009, 3010, 3011, 3012, 3013, 3014)]
++                print(f"{name:8s} pos {vals[0]:8.3f} {vals[1]:8.3f} {vals[2]:8.3f}  rot(rev) {vals[3]:7.4f} {vals[4]:7.4f} {vals[5]:7.4f}")
++        for k in range(args.frames):
++            shot(out / f"frame-{k:04d}.png")
++            step(args.step)
++        print(f"captured {args.frames} frames of {args.level.name} at {args.size} into {out}")
++    finally:
++        client.close()
++        if proc.poll() is None:
++            proc.terminate()
++            try:
++                proc.wait(timeout=5)
++            except subprocess.TimeoutExpired:
++                proc.kill()
++        log.close()
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/scripts/level-build.sh b/scripts/level-build.sh
+index 473834203..6309c266d 100755
+--- a/scripts/level-build.sh
++++ b/scripts/level-build.sh
+@@ -72,7 +72,7 @@ wf_level_build() {
+     local env=(CARGO_HOME=/build/cargo-home) name
+     while IFS= read -r name; do
+         case "$name" in
+-            TANK_*|AQUARIUM_*|LIONFISH_*|BETTA_*|PLANTED_*|SHRIMP_*) env+=("$name") ;;
++            TANK_*|AQUARIUM_*|LIONFISH_*|BETTA_*|PLANTED_*|SHRIMP_*|CANDLE_*) env+=("$name") ;;
+         esac
+     done < <(compgen -e)
+     WF_CONTAINER_IMAGE=blender WF_CONTAINER_NETWORK=host WF_CONTAINER_ENV="${env[*]}" \
+diff --git a/tests/test_capture_candle_study.py b/tests/test_capture_candle_study.py
+new file mode 100644
+index 000000000..29bc160a4
+--- /dev/null
++++ b/tests/test_capture_candle_study.py
+@@ -0,0 +1,31 @@
++"""The candle study capture must really warm up before it takes frames (candle flicker plan, verification step 0, 2026-11-27).
++
++scripts/capture-candle-study.py waited for each frame step by watching the level clock. With no clock reading yet (NaN) it took the step as
++done, so its 60-frame warm-up was one frame: the level's eased camera was still flying in from the orbit when the frames were taken, and the
++picture looked about 21 degrees off the study pose. A NaN reading must never count as arrival.
++"""
++import importlib.util
++import math
++from pathlib import Path
++
++SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "capture-candle-study.py"
++
++
++def load():
++    spec = importlib.util.spec_from_file_location("capture_candle_study", SCRIPT)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++def test_a_missing_clock_reading_is_never_arrival():
++    m = load()
++    assert not m.stepped(math.nan, 5.0, 60)
++    assert not m.stepped(1.0, math.nan, 1)
++
++
++def test_arrival_needs_the_frames_to_have_run():
++    m = load()
++    assert not m.stepped(1.0, 2.0, 60)          # 30 frames of 60
++    assert m.stepped(1.0, 2.9, 60)              # 57 frames: inside the 10 % slack
++    assert m.stepped(0.0, 1 / 30, 1)
+diff --git a/wflevels/cuckoo_village/blender_create_cuckoo_village.py b/wflevels/cuckoo_village/blender_create_cuckoo_village.py
+index 66aa604d2..ad79fc037 100644
+--- a/wflevels/cuckoo_village/blender_create_cuckoo_village.py
++++ b/wflevels/cuckoo_village/blender_create_cuckoo_village.py
+@@ -80,17 +80,30 @@ assert [n for n in (f'cottage_light_{i + 1:02}' for i in range(tl.HOUSES)) if n
+ # stagger and the flames flicker (docs/plans/2026-11-22-cuckoo-village-candle-flicker.md): two groups of five candles, each built in two shapes. Static meshes
+ # (never posed): the director only switches their visibility mailboxes, showing one shape of each group at a time.
+ assert [n for n in (f'pine_{i + 1:02}' for i in range(tl.TREES)) if n not in objs] == [], 'the pine trees changed'
++FLAMES = os.environ.get('CANDLE_FLAMES', 'swap')       # measurement builds only: 'deform' is the flicker plan's Option B (candle-flicker-spike)
++assert FLAMES in ('swap', 'deform'), FLAMES
++FLAME_FEET = []
+ mesh_actor = scope['mesh_actor']          # the layout's helper: an anchored platform mesh actor from vertices, faces and an atlas tile
+ for i in range(tl.TREES):
+     tree = objs[f'pine_{i + 1:02}']
+     sticks, _ = cd.tree_candles(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)
+     stick_verts, stick_faces = cd.merge(sticks)
+     mesh_actor(f'candle_sticks_{i+1:02}', stick_verts, stick_faces, cd.STICK_TILE)['wf_Visibility Mailbox'] = 440+i
+-    for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
+-        verts, faces = cd.merge(parts)
+-        cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
+-        mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
++    if FLAMES == 'deform':
++        # flicker plan, Option B (measurement builds only): one flame mesh a tree, built upright at its tallest, bound to ten DFRM curves after the
++        # export (flame_rig.py); the director bends and shrinks it
++        feet = [(b[0], b[1], b[2] + cd.STICK_HEIGHT) for b in cd.candle_bases(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x)]
++        FLAME_FEET.append(feet)
++        verts, faces = cd.merge([cd.flame(f, cd.FLAME_RADIUS, cd.FLAME_SHAPES[1][0]) for f in feet])
++        mesh_actor(f'candle_flames_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = forth.FLAME_B_CELL0 + i
++    else:
++        for (group, shape), parts in sorted(cd.tree_flame_shapes(i, tuple(tree.location), tree.rotation_euler.z, tree.scale.x).items()):
++            verts, faces = cd.merge(parts)
++            cell = tl.FLICKER_CELL0 + 2 * (2 * i + group) + (shape - 1)
++            mesh_actor(f'candle_flames_{"ab"[group]}{shape}_{i + 1:02}', verts, faces, cd.FLAME_TILE)['wf_Visibility Mailbox'] = cell
+     tree['wf_Visibility Mailbox'] = 330+i
++if FLAMES == 'deform':
++    (HERE / 'flame-bases.json').write_text(json.dumps(FLAME_FEET))
+ 
+ # The window boxes (docs/plans/2026-11-22-cuckoo-village-flowers.md). The 13 cottages share one mesh, `standard_house`, which today
+ # carries the blocky plants of its two front window boxes. They come out of it into their own actor, `cottage_flower_blocks` (all
+@@ -359,7 +372,21 @@ assert all(name in indices for name in ('SunLight', 'AmbientLight', 'AlpineSkyDa
+ for names in (tl.FIG_NAMES, tl.FIG_B_NAMES):
+     for a, b in zip(names, names[1:]):
+         assert indices[b] - indices[a] == 1, 'the four figures of a set must be contiguous'
+-objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields)
++STUDY = None
++if os.environ.get('CANDLE_STUDY'):
++    # the near study (flicker plan, 'Judging them by eye'; measurement builds only): a fixed camera on the tangent through one candle of one pine,
++    # so its flame is seen against the sky from CANDLE_STUDY_DISTANCE metres, looking at the flame's ring
++    study_i = int(os.environ['CANDLE_STUDY'])
++    study_tree = objs[f"pine_{study_i + 1:02d}"]
++    base = cd.candle_bases(study_i, tuple(study_tree.location), study_tree.rotation_euler.z, study_tree.scale.x)[int(os.environ.get('CANDLE_STUDY_CANDLE', '6'))]
++    outx, outy = base[0] - study_tree.location.x, base[1] - study_tree.location.y
++    norm = math.hypot(outx, outy)
++    dist = float(os.environ.get('CANDLE_STUDY_DISTANCE', '1.5'))
++    cam = (base[0] - outy / norm * dist, base[1] + outx / norm * dist, base[2] + cd.STICK_HEIGHT + 0.05)
++    look = (base[0], base[1], base[2] + cd.STICK_HEIGHT + 0.04)
++    STUDY = dict(cam=cam, look=look)
++    print(f'{TAG} study camera {cam} looking at {look}')
++objs['Director']['wf_Script'] = forth.director_script(indices, settings_fields, study=STUDY)
+ (HERE / 'actor-map.json').write_text(json.dumps(dict(indices=indices, reference=REFERENCE), indent=1) + '\n')
+ print(f'{TAG} {len(objects)} actors')
+ bpy.ops.wf.export_level(filepath=str(HERE / 'cuckoo_village.lev'))
+diff --git a/wflevels/cuckoo_village/build.sh b/wflevels/cuckoo_village/build.sh
+index 853916833..62793be51 100755
+--- a/wflevels/cuckoo_village/build.sh
++++ b/wflevels/cuckoo_village/build.sh
+@@ -14,4 +14,6 @@ cd "$ROOT"
+ source scripts/level-build.sh
+ wf_level_build "$0" "$@"
+ blender --background --python-exit-code 1 --python wflevels/cuckoo_village/blender_create_cuckoo_village.py
++# CANDLE_FLAMES=deform (flicker plan, Option B; measurement builds only): bind each tree's flames to ten DFRM curves in the exported meshes
++if [ "${CANDLE_FLAMES:-swap}" = deform ]; then python3 wflevels/cuckoo_village/flame_rig.py; fi
+ bash wftools/wf_blender/build_level_binary.sh cuckoo_village
+diff --git a/wflevels/cuckoo_village/flame_rig.py b/wflevels/cuckoo_village/flame_rig.py
+new file mode 100644
+index 000000000..7b4864c84
+--- /dev/null
++++ b/wflevels/cuckoo_village/flame_rig.py
+@@ -0,0 +1,107 @@
++#!/usr/bin/env python3
++"""Option B of the candle flicker plan: bind each pine's ten flames to ten DFRM curves (docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
++
++A flame is the diamond of candles.flame(): a foot, a ring a third of the way up and a tip. Each flame becomes one curve of two bones: bone 0 from
++the foot to the ring, bone 1 from the ring to the tip. A vertex at the foot stays where it is, the four ring vertices ride the end of bone 0 and the
++tip rides the end of bone 1, so a flex bias on the curve leans the flame about its foot and a scale below 1 (about the curve's root) shortens it. The
++mesh is authored at its tallest and upright; the director only bends and shrinks it. The ventral axis is +X, the draught.
++
++    flame_rig.py [-h]            bind wflevels/cuckoo_village/candle_flames_NN.iff (written by the Blender build) using flame-bases.json
++                                 (the build writes it: per tree, the ten flame feet in candle_bases order); run by build.sh when CANDLE_FLAMES=deform
++
++The pure functions (chains, bindings) are tested without Blender or the engine by tests/test_cuckoo_village_flame_rig.py.
++"""
++from __future__ import annotations
++
++import json
++import math
++import struct
++import sys
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++sys.path.insert(0, str(HERE))
++sys.path.insert(0, str(HERE.parent.parent / "wftools" / "wf_blender"))
++import candles as cd  # noqa: E402
++
++TALL = cd.FLAME_SHAPES[1][0]              # the authored height: the tallest the flame ever stands (the scale cell only shrinks, 0.02 to 1)
++LIMITS = (35.0, 35.0, 35.0, 35.0)         # ventral, dorsal, lateral, twist degrees
++EPS = 1e-4                                # the exported VRTX is 16.16 fixed point (1.5e-5 m a step): a foot can land a step below its base
++
++
++def chains(feet):
++    """One two-bone chain per flame foot, straight up, ventral axis the draught (+X)."""
++    out = []
++    for fx, fy, fz in feet:
++        ring = fz + TALL / 3.0
++        out.append([{"head": (fx, fy, fz), "tail": (fx, fy, ring), "z_axis": (1.0, 0.0, 0.0), "limits": LIMITS},
++                    {"head": (fx, fy, ring), "tail": (fx, fy, fz + TALL), "z_axis": (1.0, 0.0, 0.0), "limits": LIMITS}])
++    return out
++
++
++def bindings(vertices, feet, none, on_sample):
++    """(kind, sample, weight) per vertex: foot rigid, ring on sample 2n, tip on sample 2n + 1, for the flame n whose foot is nearest below it."""
++    out = []
++    for v in vertices:
++        best = None
++        for n, f in enumerate(feet):
++            dz = v[2] - f[2]
++            d2 = (v[0] - f[0]) ** 2 + (v[1] - f[1]) ** 2
++            if -EPS <= dz <= TALL + EPS and d2 <= 0.05 ** 2 and (best is None or d2 < best[0]):
++                best = (d2, n, dz)
++        if best is None:
++            raise ValueError(f"vertex {v} belongs to no flame")
++        _, n, dz = best
++        if dz < EPS:
++            out.append((none, 0, 0))
++        elif abs(dz - TALL / 3.0) < 1e-4:
++            out.append((on_sample, 2 * n, 1))
++        elif abs(dz - TALL) < 1e-4:
++            out.append((on_sample, 2 * n + 1, 1))
++        else:
++            raise ValueError(f"vertex {v} is {dz:.5f} m above its flame's foot: neither foot, ring nor tip")
++    return out
++
++
++def payload(vertices, feet, dfrm):
++    return dfrm.build_chunk_curves(chains(feet), vertices, bindings(vertices, feet, dfrm.NONE, dfrm.ON_SAMPLE), knots=(0, 1))
++
++
++def bind_file(path: Path, feet, dfrm) -> int:
++    """Append the DFRM chunk to an exported MODL .iff, as the reef's feather star does. Returns the vertex count."""
++    data = path.read_bytes()
++    if data[:4] != b"MODL" or struct.unpack_from("<I", data, 4)[0] != len(data) - 8:
++        raise ValueError(f"{path}: not a MODL file")
++    cursor, vertices = 8, None
++    while cursor < len(data):
++        tag, size = struct.unpack_from("<4sI", data, cursor)
++        end = cursor + 8 + ((size + 3) & ~3)
++        if end > len(data) or tag == b"DFRM":
++            raise ValueError(f"{path}: malformed or already bound")
++        if tag == b"VRTX":
++            if vertices is not None or size % 24:
++                raise ValueError(f"{path}: unexpected vertices")
++            vertices = [tuple(v / 65536 for v in struct.unpack_from("<iii", data, cursor + 20 + i)) for i in range(0, size, 24)]
++        cursor = end
++    if cursor != len(data) or not vertices:
++        raise ValueError(f"{path}: no vertices")
++    body = payload(vertices, feet, dfrm)
++    chunk = b"DFRM" + struct.pack("<I", len(body)) + body + b"\0" * (-len(body) % 4)
++    path.write_bytes(b"MODL" + struct.pack("<I", len(data) - 8 + len(chunk)) + data[8:] + chunk)
++    return len(vertices)
++
++
++def main(argv):
++    if any(a in ("-h", "--help") for a in argv):
++        print(__doc__)
++        return 0
++    import dfrm_chunk as dfrm
++    bases = json.loads((HERE / "flame-bases.json").read_text())
++    for i, feet in enumerate(bases):
++        n = bind_file(HERE / f"candle_flames_{i + 1:02d}.iff", [tuple(f) for f in feet], dfrm)
++        print(f"[flame-rig] candle_flames_{i + 1:02d}.iff: {n} vertices, {len(feet)} curves")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv[1:]))
+diff --git a/wflevels/cuckoo_village/forth.py b/wflevels/cuckoo_village/forth.py
+index 5b9e052f3..3fd7c59a3 100644
+--- a/wflevels/cuckoo_village/forth.py
++++ b/wflevels/cuckoo_village/forth.py
+@@ -15,6 +15,7 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import os
+ import sys
+ from typing import Dict, List
+ 
+@@ -55,6 +56,47 @@ def _flame_words() -> List[str]:
+     ]
+ 
+ 
++FLAME_B_CELL0 = 800          # candle flicker spike, Option B only: tree i's flame mesh visibility cell (A's cells 700..795 are unused then)
++DFRM_BLOCK_CELL = 1000       # Option B only: one DFRM v2 control block (40 + 4 x 10 cells), reused tree by tree: deform-block reads it at the call
++
++
++def _deform_flame_words(ix: Dict[str, int]) -> List[str]:
++    """Option B of the flicker plan (measurement builds only, CANDLE_FLAMES=deform): one DFRM mesh of ten curves a tree. cv-flames lights tree i's
++    mesh on cell FLAME_B_CELL0 + i by Option A's lit rule; cv-deform gives each lit tree's ten curves a scale and a flex bias from the same two-sine
++    drive (u = drive / 1.4 clamped to -1..1: scale SCALE0 + SPAN u, flex FLEX_DEG u; curve c is in group c mod 2) and poses its mesh."""
++    out = [
++        ": cv-flames  0 cv-i cv!  begin",
++        "  cv-i cv@ 5 * 13 cv-mod 13 / cv-s cv!",
++        f"  cv-sod cv@ {n(tl.DUSK_START)} cv-s cv@ {n(tl.DUSK_LEN)} * + >= cv-sod cv@ {n(tl.DAWN_START)} cv-s cv@ {n(tl.DAWN_LEN)} * + < + if 1 else 0 then",
++        f"  {tl.CANDLE_CELL} cv@ * cv-i cv@ cv-s-trees < if 1 else 0 then * cv-s-window-lights *  {FLAME_B_CELL0} cv-i cv@ + cv!",
++        f"  cv-i cv@ 1 + dup cv-i cv! {tl.TREES} =  until ;",
++        ": cv-bend",
++        f"  1 {DFRM_BLOCK_CELL + 29} cv!  0 cv-cc cv!  begin",
++        f"    cv-i cv@ 2 * cv-cc cv@ 2 cv-mod + {n(tl.FLICKER_PHI)} * cv-frac cv-fp cv!",
++        f"    cv-sc cv@ {n(tl.FLICKER_F1)} * cv-fp cv@ + sin-rev  cv-sc cv@ {n(tl.FLICKER_F2)} * cv-fp cv@ 2 * + sin-rev +  1.4 / 1 min -1 max  cv-fx cv!",
++        f"    {DFRM_BLOCK_CELL + 40} cv-cc cv@ 4 * +  cv-fl cv!",
++        f"    {n(tl.FLICKER_SCALE0)} {n(tl.FLICKER_SCALE_SPAN)} cv-fx cv@ * +  cv-fl cv@ cv!  0 cv-fl cv@ 1 + cv!  0 cv-fl cv@ 2 + cv!  {n(tl.FLICKER_FLEX_DEG)} cv-fx cv@ * cv-fl cv@ 3 + cv!",
++        "    cv-cc cv@ 1 + dup cv-cc cv! 10 =  until ;",
++        ": cv-deform"]
++    for i in range(tl.TREES):
++        out.append(f"  {FLAME_B_CELL0 + i} cv@ if  {i} cv-i cv!  cv-bend  {DFRM_BLOCK_CELL} 10 {ix[f'candle_flames_{i + 1:02d}']} dfrm-pose-curves drop  then")
++    out.append("  ;")
++    return out
++
++
++def _study_words(ix: Dict[str, int], study: Dict) -> List[str]:
++    """The near study (flicker plan, 'Judging them by eye'; measurement builds only, CANDLE_STUDY=tree): a fixed camera beside one pine, and the
++    flicker on the level clock (mailbox 1906, seconds) instead of the wall clock, so stepped desktop frames are deterministic and 1/30 s apart."""
++    cx, cy, cz = study["cam"]
++    lx, ly, lz = study["look"]
++    cs, lk, pl = ix["cs_wide"], ix["LookAt"], ix["Player"]
++    # The Player (Physics mobility) falls through the ground in a desktop run and leaves the room at z = -20 after about 70 frames, which stops
++    # a Debug engine; the study holds it where the level places it, so a capture can run for minutes.
++    return [": cv-study-clock  1906 cv@ 60 cv-mod cv-sc cv! ;",
++            f": cv-study  {n(cx)} {cs} cv-wx {n(cy)} {cs} cv-wy {n(cz)} {cs} cv-wz  {n(lx)} {lk} cv-wx {n(ly)} {lk} cv-wy {n(lz)} {lk} cv-wz"
++            f"  0 {pl} cv-wx -3 {pl} cv-wy 1 {pl} cv-wz ;"]
++
++
+ def hand_words(ix: Dict[str, int]) -> List[str]:
+     return [
+         ": cv-hands",
+@@ -145,11 +187,15 @@ def common_words() -> List[str]:
+     return L
+ 
+ 
+-def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
++def director_script(ix: Dict[str, int], fields: Dict[str, int] = None, study: Dict = None) -> str:
+     """fields: settings label -> field index in CuckooVillageSettings (the catalog's index); None = made-up, for tests."""
+     check_names()
++    mode = os.environ.get("CANDLE_FLAMES", "swap")       # measurement builds only: 'deform' is the flicker plan's Option B
++    assert mode in ("swap", "deform"), mode
+     fields = fields or {label: 129 + i for i, label in enumerate(tl.SETTINGS_DEFAULTS)}
+     L = ["\\ Cuckoo Village director (generated by wflevels/cuckoo_village/forth.py; do not edit)"] + common_words()
++    if mode == "deform":
++        L.append(f": cv-cc {600 + len(CELLS)} ;")
+     # the settings object: property@ ( actor field -- value valid ); an absent overlay or field gives the default
+     owner = ix.get("CuckooVillageSettings", 0)
+     for label, default in tl.SETTINGS_DEFAULTS.items():
+@@ -180,7 +226,8 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
+         f": cv-candles  cv-season cv-s-candles-all-year + if 1 else 0 then {tl.CANDLE_CELL} cv! ;",      # season, or the switch
+         # a tree's flames burn while the candles show and the glow of the house of the same stagger (index mod 13) is on, so the
+         # Window lights setting dims them too (plan: "the glow of the Christmas candles")
+-        *_flame_words(),
++        *(_deform_flame_words(ix) if mode == "deform" else _flame_words()),
++        *(_study_words(ix, study) if study else []),
+     ]
+     # camera: one lap is 225 s so every quarter boundary starts a lap at the front-facing tower view
+     L += [
+@@ -228,10 +275,27 @@ def director_script(ix: Dict[str, int], fields: Dict[str, int] = None) -> str:
+         "  INDEXOF_WALL_SECOND cv@ cv-sc cv!  INDEXOF_WALL_HOUR cv@ cv-hr cv!  INDEXOF_WALL_MINUTE cv@ cv-mi cv!",
+         "  cv-mi cv@ 60 * cv-sc cv@ + cv-tm cv!",
+         "  cv-hr cv@ 3600 * cv-tm cv@ + cv-sod cv!",
+-        "  cv-hands cv-figs cv-bird cv-wins cv-candles cv-flames cv-flowers cv-cam cv-vis cv-daynight ;",
++        "  cv-hands cv-figs cv-bird cv-wins cv-candles " + ("cv-study-clock " if study else "") + "cv-flames " + ("cv-deform " if mode == "deform" else "")
++        + "cv-flowers cv-cam " + ("cv-study " if study else "") + "cv-vis cv-daynight ;",
+         "cv-tick",
+     ]
+-    return "\n".join(L) + "\n"
++    # measurement builds only (candle flicker spike): CANDLE_NIGHT_HOUR=H holds the village at hour H (minutes and seconds still run, so the flicker and
++    # the camera move as normal) and CANDLE_ALL_YEAR=1 lights the candles whatever the date or setting, so a run in daylight or out of season still
++    # measures the lit flames
++    text = "\n".join(L) + "\n"
++    if os.environ.get("CANDLE_NIGHT_HOUR"):
++        old = "INDEXOF_WALL_HOUR cv@ cv-hr cv!"
++        assert text.count(old) == 1, old
++        text = text.replace(old, f"{int(os.environ['CANDLE_NIGHT_HOUR'])} cv-hr cv!")
++    if os.environ.get("CANDLE_ALL_YEAR") == "1":
++        old = f"cv-season cv-s-candles-all-year + if 1 else 0 then {tl.CANDLE_CELL} cv!"
++        assert text.count(old) == 1, old
++        text = text.replace(old, f"1 {tl.CANDLE_CELL} cv!")
++    if os.environ.get("CANDLE_CAMERA_STILL") == "1":       # the camera held at its far front view (Camera motion's still pose), for A/B runs
++        old = "cv-s-camera-motion if 0 cv-u cv! 1 cv-bb cv! then"
++        assert text.count(old) == 1, old
++        text = text.replace(old, "0 cv-u cv! 1 cv-bb cv!")
++    return text
+ 
+ 
+ def main(argv: List[str]) -> int:
+diff --git a/wflevels/cuckoo_village/timeline.py b/wflevels/cuckoo_village/timeline.py
+index f70585058..1144a532a 100644
+--- a/wflevels/cuckoo_village/timeline.py
++++ b/wflevels/cuckoo_village/timeline.py
+@@ -258,3 +258,18 @@ def flame_shape(t: float, tree: int, group: int) -> int:
+     """1 (tall, leaning toward the draught) or 2 (short, leaning away) for a tree's group (0 = A, 1 = B) at t seconds into the minute."""
+     return 1 if flame_drive(t, 2 * tree + group) > 0.0 else 2
+ 
++
++
++# Option B of the flicker plan (measurement builds only; a DFRM mesh a tree, ten curves): the same drive as a smooth value u = clamp(drive / 1.4, -1, 1);
++# a curve's scale is SCALE0 + SPAN u (0.67 to 1.0: the mesh is authored at its tallest) and its flex bias FLEX_DEG u degrees.
++FLICKER_SCALE0, FLICKER_SCALE_SPAN, FLICKER_FLEX_DEG = 0.835, 0.165, 5.0
++
++
++def flame_u(t: float, group_index: int) -> float:
++    return max(-1.0, min(1.0, flame_drive(t, group_index) / 1.4))
++
++
++def deform_cells(t: float, tree: int, curve: int):
++    """(scale, flex bias in degrees) of curve `curve` (0 to 9; its group is curve mod 2) of tree `tree` at t seconds into the minute."""
++    u = flame_u(t, 2 * tree + curve % 2)
++    return FLICKER_SCALE0 + FLICKER_SCALE_SPAN * u, FLICKER_FLEX_DEG * u
+-- 
+2.53.0
+

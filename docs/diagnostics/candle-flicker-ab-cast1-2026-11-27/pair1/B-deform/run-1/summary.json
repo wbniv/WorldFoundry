@@ -1,0 +1,22 @@
+{
+  "run": 1,
+  "frames": 1785,
+  "interval_count": 1785,
+  "fps": 29.74502724270533,
+  "refresh_ms": 16.683333,
+  "p50_ms": 33.36671,
+  "p90_ms": 33.367118,
+  "p95_ms": 50.050091,
+  "p99_ms": 50.050468,
+  "worst_ms": 66.733587,
+  "missed_refresh_percent": 92.43697478991596,
+  "duration_seconds": 60,
+  "layer": "SurfaceView[org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksActivity](BLAST)#4106",
+  "measurement_anchor_ns": 183986454589782,
+  "measurement_start_wall_time": 1795739287.475274,
+  "settling_reads": 2,
+  "sampling_holes": [],
+  "empty_sample_indices": [],
+  "latency_statistics_may_include_unobserved_bridges": false,
+  "observed_span_seconds": 60.010030767
+}

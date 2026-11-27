@@ -1,0 +1,356 @@
+[
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739360.6103995,
+    "end": 1795739360.9753036,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~0rabos3GhEmcX6wa62xrrg==/org.worldfoundry.game.clocks-wLdwS1FjysLLhV9FVqxSUw==/base.apk'"
+    ],
+    "start": 1795739360.9771662,
+    "end": 1795739361.2121565,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739361.2175534,
+    "end": 1795739361.5451767,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~0rabos3GhEmcX6wa62xrrg==/org.worldfoundry.game.clocks-wLdwS1FjysLLhV9FVqxSUw==/base.apk'"
+    ],
+    "start": 1795739361.5479567,
+    "end": 1795739361.7364166,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "exec-out",
+      "cat",
+      "/data/app/~~0rabos3GhEmcX6wa62xrrg==/org.worldfoundry.game.clocks-wLdwS1FjysLLhV9FVqxSUw==/base.apk"
+    ],
+    "start": 1795739361.739028,
+    "end": 1795739366.0960763,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/opt/wf-device-coordinator/scripts/wf_device/plugins/android/resources/installer-helper.jar",
+      "/data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6-helper.jar"
+    ],
+    "start": 1795739366.294393,
+    "end": 1795739366.430405,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6-helper.jar"
+    ],
+    "start": 1795739366.4324238,
+    "end": 1795739366.578483,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "CLASSPATH=/data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6-helper.jar timeout 15 app_process /system/bin WfInstallerProbe 6f1ab3e7ad6795faeef5a10737166aa6"
+    ],
+    "start": 1795739366.5813537,
+    "end": 1795739368.6871676,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1795739368.690024,
+    "end": 1795739368.9821515,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "push",
+      "/var/lib/wf-device-coordinator/inputs/052292fc80939e9dfc2d0356376bd5ef7e8725fb506b7e479cab2913229afa0d.apk",
+      "/data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6.apk"
+    ],
+    "start": 1795739368.9954154,
+    "end": 1795739374.5377698,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6.apk"
+    ],
+    "start": 1795739374.5397618,
+    "end": 1795739374.8718932,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm install-create -r --user all --pkg org.worldfoundry.game.clocks --originating-uri wf-coordinator://install/6f1ab3e7ad6795faeef5a10737166aa6 -S 12498603"
+    ],
+    "start": 1795739374.9424167,
+    "end": 1795739375.2998443,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm install-write -S 12498603 951278782 base /data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6.apk"
+    ],
+    "start": 1795739375.383701,
+    "end": 1795739375.8042758,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum /data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6-helper.jar"
+    ],
+    "start": 1795739375.8072562,
+    "end": 1795739376.0670688,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "CLASSPATH=/data/local/tmp/wf-J-83080304e587-install-6f1ab3e7ad6795faeef5a10737166aa6-helper.jar timeout 15 app_process /system/bin WfInstallerCommit 951278782 wf-coordinator://install/6f1ab3e7ad6795faeef5a10737166aa6 org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739376.161501,
+    "end": 1795739377.9578087,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1795739377.9598668,
+    "end": 1795739378.3365777,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1795739378.8497896,
+    "end": 1795739379.281995,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1795739379.7917142,
+    "end": 1795739380.1556158,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys package installs"
+    ],
+    "start": 1795739380.6688898,
+    "end": 1795739381.1931574,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/sys/kernel/random/boot_id"
+    ],
+    "start": 1795739381.2031918,
+    "end": 1795739381.4870107,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739381.489865,
+    "end": 1795739382.0229895,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~-XJLCY6Up60WG0_3HaM8PQ==/org.worldfoundry.game.clocks-e1WeDmi8mRXGkGi76S6B3A==/base.apk'"
+    ],
+    "start": 1795739382.0249982,
+    "end": 1795739382.380732,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cat /proc/sys/kernel/random/boot_id"
+    ],
+    "start": 1795739382.3830602,
+    "end": 1795739382.5739613,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "pm path org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739382.6026518,
+    "end": 1795739383.0655189,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "sha256sum '/data/app/~~-XJLCY6Up60WG0_3HaM8PQ==/org.worldfoundry.game.clocks-e1WeDmi8mRXGkGi76S6B3A==/base.apk'"
+    ],
+    "start": 1795739383.067156,
+    "end": 1795739383.2531712,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-83080304e587-install-7122a2c602466c1a2e306a34180e3c7f.apk"
+    ],
+    "start": 1795739383.27996,
+    "end": 1795739383.6261194,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-83080304e587-install-7122a2c602466c1a2e306a34180e3c7f.apk; echo wf-status=$?"
+    ],
+    "start": 1795739383.6278381,
+    "end": 1795739383.741896,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-83080304e587-install-7122a2c602466c1a2e306a34180e3c7f-helper.jar"
+    ],
+    "start": 1795739383.7649832,
+    "end": 1795739384.0437202,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-83080304e587-install-7122a2c602466c1a2e306a34180e3c7f-helper.jar; echo wf-status=$?"
+    ],
+    "start": 1795739384.0454097,
+    "end": 1795739384.2024975,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-83080304e587-install-55310f88a66dafb036a96ff999fb03ab.apk"
+    ],
+    "start": 1795739384.224173,
+    "end": 1795739384.3553019,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-83080304e587-install-55310f88a66dafb036a96ff999fb03ab.apk; echo wf-status=$?"
+    ],
+    "start": 1795739384.3571591,
+    "end": 1795739384.4837644,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "rm -f /data/local/tmp/wf-J-83080304e587-install-55310f88a66dafb036a96ff999fb03ab-helper.jar"
+    ],
+    "start": 1795739384.505,
+    "end": 1795739384.6845357,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "test ! -e /data/local/tmp/wf-J-83080304e587-install-55310f88a66dafb036a96ff999fb03ab-helper.jar; echo wf-status=$?"
+    ],
+    "start": 1795739384.6860452,
+    "end": 1795739384.8169484,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am force-stop org.worldfoundry.game.clocks"
+    ],
+    "start": 1795739384.8450549,
+    "end": 1795739385.096281,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "settings get secure screensaver_components"
+    ],
+    "start": 1795739385.0988941,
+    "end": 1795739385.2961924,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795739385.298138,
+    "end": 1795739385.4751215,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME"
+    ],
+    "start": 1795739385.4784663,
+    "end": 1795739385.6755254,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "am start -W -n com.google.android.apps.tv.launcherx/.home.HomeActivity"
+    ],
+    "start": 1795739385.677121,
+    "end": 1795739385.91605,
+    "returncode": 0
+  },
+  {
+    "args": [
+      "shell",
+      "dumpsys activity activities"
+    ],
+    "start": 1795739385.9178674,
+    "end": 1795739386.1093102,
+    "returncode": 0
+  }
+]

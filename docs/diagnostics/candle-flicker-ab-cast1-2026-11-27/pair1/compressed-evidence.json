@@ -1,0 +1,46 @@
+{
+ "pair1/A-swap/run-1/logcat.txt": {
+  "bytes": 161943,
+  "sha256": "98820540cee3142b63947a0ad6723fa2477399bea40bdfe58fc6700e4c320939"
+ },
+ "pair1/A-swap/run-1/samples.json": {
+  "bytes": 968074,
+  "sha256": "fd1404385496dc76afb6eee98e1764f311ff2c48d4ecba56ac010bd16404b0ec"
+ },
+ "pair1/A-swap/run-1/wf.log": {
+  "bytes": 1444112,
+  "sha256": "8e5ebe8541cc8f8d0ee50d6b39b90e7cc326adcde9cde37b1469004381877e33"
+ },
+ "pair1/B-deform/run-1/logcat.txt": {
+  "bytes": 146010,
+  "sha256": "0dafd15250b46b9b1292996114c1358206bb3eaa3ec367c7d7aa89330029a8e6"
+ },
+ "pair1/B-deform/run-1/samples.json": {
+  "bytes": 948456,
+  "sha256": "6f3d740f046379cda0cb64822a26b7cca73363b148e958df3245a99a144df245"
+ },
+ "pair1/B-deform/run-1/wf.log": {
+  "bytes": 1535398,
+  "sha256": "55247ff8e9626c4167854dc79dda6271e315a733242cf91796562429c225241c"
+ },
+ "pair1/commands.json": {
+  "bytes": 103969,
+  "sha256": "61fe6bbe74858a9c60a136f11153407b13f8a0535cb734bd63c988cf220723bd"
+ },
+ "pair1/installer-session-preflight.txt": {
+  "bytes": 90773,
+  "sha256": "cab3dd5ebf05fdc06e256d88d3b382bc81381c63dedade7fab658d32aac1de2f"
+ },
+ "pair1/installer-session.txt": {
+  "bytes": 92278,
+  "sha256": "ae65f5fc56b084f8fdedfd68dd6658d4b55911fae908b591d97955b0659ceffb"
+ },
+ "pair1/logcat.txt": {
+  "bytes": 146010,
+  "sha256": "0dafd15250b46b9b1292996114c1358206bb3eaa3ec367c7d7aa89330029a8e6"
+ },
+ "pair1/wf.log": {
+  "bytes": 1535398,
+  "sha256": "55247ff8e9626c4167854dc79dda6271e315a733242cf91796562429c225241c"
+ }
+}
