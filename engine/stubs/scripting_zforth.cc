@@ -1236,19 +1236,22 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 fprintf(stderr, "FSN: emitted '%s' — %d nodes (%d towers)\n",
                         g_fsn_root.c_str(), n, (int)g_fsn_towers.size());
                 zf_push(ctx, (zf_cell)(float)n);
-            } else if (custom >= 24 && custom <= 29) {
+            } else if (custom >= 57 && custom <= 62) {
                 // node-kind/x/y/z/p1/p2 ( i -- v ) — index accessors into the table.
+                // Custom 57-62: they were 24-29 until 2026-11-27, but read-actor-mailbox (24,
+                // 484b035fa) and random / seed-random (25/26, ef45ca330) took those ids and,
+                // tested first above, shadowed node-kind/x/y (filesys drew no towers).
                 int i = (int)zf_pop(ctx);
                 float v = 0.0f;
                 if (i >= 0 && i < (int)g_fsn_nodes.size()) {
                     const FsnNode& nd = g_fsn_nodes[i];
                     switch (custom) {
-                        case 24: v = (float)nd.kind; break;
-                        case 25: v = nd.x;  break;
-                        case 26: v = nd.y;  break;
-                        case 27: v = nd.z;  break;
-                        case 28: v = nd.p1; break;
-                        default: v = nd.p2; break;   // 29
+                        case 57: v = (float)nd.kind; break;
+                        case 58: v = nd.x;  break;
+                        case 59: v = nd.y;  break;
+                        case 60: v = nd.z;  break;
+                        case 61: v = nd.p1; break;
+                        default: v = nd.p2; break;   // 62
                     }
                 }
                 zf_push(ctx, (zf_cell)v);
@@ -1787,15 +1790,16 @@ void Init(MailboxesManager& mgr)
         "  2drop ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-x-scale): %d\n", r);
 
-    // FSN Phase 3 flat-table bridge words (custom 23-31 / sys 151-159).
+    // FSN Phase 3 flat-table bridge words (custom 23, 30, 31 and 57-62). A syscall id names
+    // one word only: tests/check_level_scripts.py fails when two words share one.
     static const struct { const char* name; const char* body; } kFsnWords[] = {
         { "fsn-scan",   "151 sys" },
-        { "node-kind",  "152 sys" },
-        { "node-x",     "153 sys" },
-        { "node-y",     "154 sys" },
-        { "node-z",     "155 sys" },
-        { "node-p1",    "156 sys" },
-        { "node-p2",    "157 sys" },
+        { "node-kind",  "185 sys" },
+        { "node-x",     "186 sys" },
+        { "node-y",     "187 sys" },
+        { "node-z",     "188 sys" },
+        { "node-p1",    "189 sys" },
+        { "node-p2",    "190 sys" },
         { "node-count", "158 sys" },
         { "pack-rgb",   "159 sys" },
     };
