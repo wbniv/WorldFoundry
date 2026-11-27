@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/d40783ad2) | Cuckoo Village size gate: account the growth and propose 9 MiB (awaiting Will) |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/a377e5243) | Move the flowers' level-of-detail follow-up to its own plan; TODO item |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/cfd8ed997) | Flowers: the village profiled on cast1 (30 fps both ways) and the generated report |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/996161a1c) | Flowers: report --trim, and the profiling method as tested on cast1 |
@@ -14,6 +15,11 @@
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/0cd9d6ddc) | Cuckoo Village window boxes: plan and prototype for trailing petunias and edelweiss |
 
 <!--history-meta v1
+d40783ad2	author	Will Norris
+d40783ad2	added	22
+d40783ad2	deleted	0
+d40783ad2	files	1
+d40783ad2	body	The flowers plan's step 7 (at most 5,732,784 bytes) fails today by\n3,055,184: the level is 8,787,968 bytes. A dated note under step 7\naccounts for every step from git history, broken down by asset from the\nlevel's ASMP map and ASS chunks, with the Clocks bundle size beside it.\nThe largest step is 1b4f1b6f0 (Alpine hills, day/night sky, 24 house and\ntree sites, 24-hour dial): +2,830,336 bytes, of which 1,572,736 is the\nsky's permanent texture page and 550,948 the flowers split per site.\n\nProposed gate: 9,437,184 bytes, enforced by a new\ntests/test_cuckoo_village_size.py once Will picks the figure. Step 7's\ntext is unchanged. The TODO item becomes "Decide: Cuckoo Village size\ngate".\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 a377e5243	author	Will Norris
 a377e5243	added	3
 a377e5243	deleted	104

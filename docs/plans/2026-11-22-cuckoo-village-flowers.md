@@ -241,7 +241,7 @@ Moved to its own plan: [Cuckoo Village flowers: level-of-detail model replacemen
 6. **The exported materials are as designed.** `cottage_flowers` has ten slots, none naming a texture, eight with flag 8 set; `cottage_flower_blocks` has the one atlas material.
 7. **The size is within the estimate.** `cuckoo_village-standalone.iff` is at most 0.75 MB larger than the 4,982,784 bytes it is today.
 
-    **Size gate re-set (proposed 2026‑11‑27), awaiting Will's decision.** The step above stays as written; it is the spec. Its limit is 4,982,784 + 750,000 = 5,732,784 bytes (the Results table reads "MB" as 10⁶ bytes). The committed level is 8,787,968 bytes, so **step 7 fails today by 3,055,184 bytes**, of which the flowers' own build is 5,712. No test enforces a size: `tests/test_clocks_bundle.py` only checks that the bundle's member equals the standalone file, and no other test reads the file's size.
+    **Size gate re-set 2026‑11‑27: 9,437,184 bytes (9 MiB), decided by Will ("Accept 9 MiB"), enforced by `tests/test_cuckoo_village_size.py`.** The proposal follows. The step above stays as written; it is the spec. Its limit is 4,982,784 + 750,000 = 5,732,784 bytes (the Results table reads "MB" as 10⁶ bytes). The committed level is 8,787,968 bytes, so **step 7 fails today by 3,055,184 bytes**, of which the flowers' own build is 5,712. No test enforces a size: `tests/test_clocks_bundle.py` only checks that the bundle's member equals the standalone file, and no other test reads the file's size.
 
     Sizes read from git (`git show <rev>:wflevels/<file> | wc -c`); the breakdown is from the level's own asset map (`ASMP`) and its per-room `ASS` chunks, compared by asset name. Commits that left the level's size unchanged are folded into the row above them.
 

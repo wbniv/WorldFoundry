@@ -181,7 +181,7 @@ wflevels/cuckoo_village-standalone.iff: 5,957,632 B (was 5,910,528 B: +47,104 B)
 wflevels/cuckoo_village.iff:            5,953,536 B
 audit-level-settings --roster levels: cuckoo_village yes, tide_harbour yes
 ```
-   **PASS** for the actors and their cells. The level-size gate was already over its budget (the flowers plan); this adds 46 KB to it and the gate has still to be re-set deliberately, a TODO item.
+   **PASS** for the actors and their cells. The level-size gate was already over its budget (the flowers plan); this adds 46 KB to it and the gate has still to be re-set deliberately, a TODO item. **Re-set 2026‑11‑27:** 9,437,184 bytes (9 MiB), decided by Will and enforced by `tests/test_cuckoo_village_size.py`; the level is 8,787,968 bytes (see the flowers plan, step 7).
 5. **The desktop engine.** With the clock frozen at 10 consecutive frames at one tree's nearest view, a capture sequence shows the flames' pixels differing between frames: the count of changed pixels inside each flame's box is above 0 on at least half of the frame pairs, and 0 anywhere outside the flames.
    **NOT RUN as written.** A near-study camera was never aimed at a candle (the engine holds the pose written, the picture does not match it; unresolved, see the TODO item). The spike's frames (the swap and deformed builds, 1920 × 1080, 33 ms apart) show the flame tip changing by about 7 px at native size where it shows at all.
 6. **Not in step.** In the same sequence, at least 5 of the 12 trees change shape on a frame where at least 5 others do not.
