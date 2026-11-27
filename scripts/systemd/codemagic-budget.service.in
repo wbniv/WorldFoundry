@@ -1,0 +1,8 @@
+[Unit]
+Description=WorldFoundry Codemagic Mac-minute budget check (PagerDuty + desktop alert at 50/80/95 %)
+After=network-online.target
+
+[Service]
+Type=oneshot
+Nice=10
+ExecStart=@REPO@/scripts/codemagic-budget-run.sh

@@ -119,6 +119,24 @@ Nothing new on AWS: a few SSM `SecureString` parameters are free in the standard
 1. `bash scripts/local-ci.sh --no-notify <commit touching wflevels/aquarium_reef/>` shows an `aquarium-check` row with PASS, and on a commit touching neither path both new rows read SKIP.
 2. `bash scripts/local-ci.sh --no-notify <commit touching wftools/wf_blender/>` shows a `blender-addon` row with PASS.
 3. `systemctl --user list-timers codemagic-budget.timer` lists the timer, and `systemctl --user start codemagic-budget.service; journalctl --user -u codemagic-budget -n 5` prints this month's Mac minutes.
+
+    ```
+    $ systemctl --user list-timers codemagic-budget.timer --no-pager
+    NEXT                         LEFT LAST PASSED UNIT                   ACTIVATES
+    Fri 2026-11-27 21:01:51 +07 41min -         - codemagic-budget.timer codemagic-budget.service
+
+    1 timers listed.
+    $ systemctl --user start codemagic-budget.service; journalctl --user -u codemagic-budget -n 8 --no-pager -o cat
+    month=2026-11 used=298 pct=59%  (budget=500 min)
+    already fired this month: ["50"]
+    threshold 50%: already fired this month
+    threshold 80%: not reached
+    threshold 95%: not reached
+    state written to /home/will/.local/state/wf/codemagic-budget.json: {"month":"2026-11","fired":["50"],"used_minutes":298,"pct":59}
+    Finished codemagic-budget.service - WorldFoundry Codemagic Mac-minute budget check (PagerDuty + desktop alert at 50/80/95 %).
+    ```
+
+    The fired list `["50"]` came from the old repo-root state file, which the installer copied. The PagerDuty key was read from SSM: no "not readable" line. Threshold dry run, `STATE_FILE=$(mktemp) BUDGET_MINUTES=1 DRY_RUN=1 scripts/codemagic-budget-run.sh`, crossed 80 % and 95 % with "would alert" and posted nothing. The desktop notification was not fired for real: that would page as well. **PASS.**
 4. `cd ~/worldfoundry.org && task apt:publish -- --dry-run` builds and signs with no upload; then a real `task apt:publish` ends with the Release/Packages.gz check and the smoke install passing, and [apt.worldfoundry.org/dists/stable/Release](https://apt.worldfoundry.org/dists/stable/Release) shows the new date.
 5. `ls .github/workflows ~/worldfoundry.org/.github/workflows` lists nothing.
 6. `gh secret list -R wbniv/worldfoundry.org` and `gh secret list -R wbniv/WorldFoundry` list nothing that is still unused.

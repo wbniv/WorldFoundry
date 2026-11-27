@@ -10,8 +10,11 @@ set -euo pipefail
 # is safe to re-run after an interruption or a typo.
 #
 # This project has no Terraform and nothing to deploy — it is pure
-# credential bootstrap for CI (the Codemagic Mac-minute budget monitor in
-# .github/workflows/codemagic-budget.yml), so there is no --deploy flag.
+# credential bootstrap for the Codemagic Mac-minute budget monitor (the
+# codemagic-budget.timer user timer, scripts/install-codemagic-budget.sh; it
+# replaced .github/workflows/codemagic-budget.yml on 2026-11-27), so there is no
+# --deploy flag. The GitHub secret/variable copies below are no longer read and go
+# in Phase 4 of docs/plans/2026-11-27-retire-github-actions.md.
 #
 # Usage:
 #   ./scripts/setup.sh                 # interactive, prompts for anything missing
@@ -114,9 +117,9 @@ GH_REPO="wbniv/WorldFoundry"
 
 SSM_CODEMAGIC="/wf/codemagic-api-token"
 SSM_PAGERDUTY="/wf/pagerduty-routing-key"
-# These three names are consumed verbatim by
-# .github/workflows/codemagic-budget.yml — do not rename one without the
-# other.
+# These three names were consumed by the retired
+# .github/workflows/codemagic-budget.yml; kept until Phase 4 removes the
+# GitHub copies.
 GH_SECRET_CODEMAGIC="CODEMAGIC_API_TOKEN"
 GH_SECRET_PAGERDUTY="PAGERDUTY_ROUTING_KEY"
 GH_VAR_APP_ID="WF_CODEMAGIC_APP_ID"
@@ -329,8 +332,8 @@ PY
 }
 
 # ── Phase B: Codemagic API token + app id ────────────────────────────────
-# Unblocks .github/workflows/codemagic-budget.yml, which is inert until the
-# secret, the PagerDuty key (Phase C) and the app id variable all exist.
+# The budget timer reads the token and app id from ~/.config/codemagic/ and the
+# PagerDuty key (Phase C) from SSM (scripts/codemagic-budget-run.sh).
 phase_codemagic() {
   log "Phase B: Codemagic API token + app id"
 
@@ -463,7 +466,7 @@ phase_codemagic_app_id() {
   echo ""
   echo "  About to store the app id in two places:"
   echo "    • GitHub Actions VARIABLE (not a secret) vars.$GH_VAR_APP_ID on $GH_REPO"
-  echo "      — consumed by .github/workflows/codemagic-budget.yml as WF_APP_ID"
+  echo "      — no longer read (GitHub Actions retired); removed in a later cleanup"
   echo "    • local file $CM_APP_ID_FILE, read by the codemagic-build skill's driver"
   echo "      so \$CODEMAGIC_APP_ID no longer has to be exported every session"
   echo ""
@@ -562,8 +565,8 @@ summary() {
   fi
   echo ""
   echo "  Smoke-test the budget monitor once all of the above are green:"
-  echo "    gh workflow run codemagic-budget.yml -R $GH_REPO -f dry_run=true"
-  echo "    gh run list --workflow=codemagic-budget.yml -R $GH_REPO --limit 1"
+  echo "    BUDGET_MINUTES=1 DRY_RUN=1 scripts/codemagic-budget-run.sh"
+  echo "    bash scripts/install-codemagic-budget.sh   # the hourly timer"
 }
 
 main() {

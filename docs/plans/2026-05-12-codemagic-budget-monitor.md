@@ -2,6 +2,8 @@
 
 **Status:** PARTIAL.
 
+> **2026‑11‑27: the monitor moved off GitHub Actions.** It now runs from the `codemagic-budget.timer` systemd user timer on the same UTC schedule (`scripts/install-codemagic-budget.sh`, `scripts/codemagic-budget-run.sh`), keeps its state in `~/.local/state/wf/codemagic-budget.json`, and adds a desktop notification beside PagerDuty. `.github/workflows/codemagic-budget.yml`, named below, is deleted. See [the retirement plan](2026-11-27-retire-github-actions.md).
+
 - **Step 1 (stop the bleed) — landed.** Every Mac workflow in `codemagic.yaml` is now manual-trigger (`triggering: events: []`): `ios-simulator-debug` with its `branch_patterns` commented out, and `macos-desktop-debug` manual by design.
 - **Steps 6 + 7 (the usage monitor) — code landed 2026‑09‑20** as [`.github/workflows/codemagic-budget.yml`](../../.github/workflows/codemagic-budget.yml) + [`scripts/codemagic-budget.sh`](../../scripts/codemagic-budget.sh), by Phase 0 of [2026-09-20-macos-metal-renderer.md](2026-09-20-macos-metal-renderer.md). **Inert until steps 4 + 5 are done** — it needs `secrets.CODEMAGIC_API_TOKEN`, `secrets.PAGERDUTY_ROUTING_KEY` and `vars.WF_CODEMAGIC_APP_ID`, all of which start from manual console actions.
 - **Steps 2 (caching on `ios-simulator-debug`), 3 (dedupe `android-apk-debug`), 4 (API token), 5 (PagerDuty service) — still OPEN.** `macos-desktop-debug` does carry caching; `ios-simulator-debug` still does not.

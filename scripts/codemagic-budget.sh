@@ -3,19 +3,22 @@
 # codemagic-budget.sh — Mac-minute budget monitor for the Codemagic account.
 #
 # Implements docs/plans/2026-05-12-codemagic-budget-monitor.md (the "usage
-# monitor" half: Implementation steps 6 + 7). Designed to run from
-# .github/workflows/codemagic-budget.yml on a GitHub-hosted ubuntu runner, so
-# it costs ZERO Mac-minutes — which is the whole point: Codemagic's quota is
+# monitor" half: Implementation steps 6 + 7). Runs on this PC from the
+# codemagic-budget.timer systemd user timer (scripts/install-codemagic-budget.sh,
+# which wraps it in scripts/codemagic-budget-run.sh to load the credentials);
+# GitHub Actions was retired on 2026-11-27. It costs ZERO Mac-minutes — which is
+# the whole point: Codemagic's quota is
 # dashboard-only (there is no /usage REST endpoint), so per-build accounting
 # via GET /builds is the only API-based visibility we can have.
 #
 # What it does
 #   1. Sums Mac instance-minutes for the current UTC month across the WF app(s).
 #   2. Compares against BUDGET_MINUTES (500 on the free individual plan).
-#   3. Fires a PagerDuty Events API v2 alert the first time each of the
-#      50 / 80 / 95 % thresholds is crossed in a given UTC month.
-#   4. Persists which thresholds already fired to a small JSON state file that
-#      the workflow round-trips through actions/cache, so alerts are
+#   3. Fires a PagerDuty Events API v2 alert, plus a desktop notification, the
+#      first time each of the 50 / 80 / 95 % thresholds is crossed in a given
+#      UTC month.
+#   4. Persists which thresholds already fired to a small JSON state file
+#      (the timer uses ~/.local/state/wf/codemagic-budget.json), so alerts are
 #      at-most-once per month and reset automatically on rollover.
 #
 # Exit status: 0 on success (thresholds fired or not), non-zero only on a real
@@ -185,6 +188,14 @@ pd_fire() {
     local threshold="$1" severity="$2" summary payload
 
     summary="WorldFoundry Codemagic: ${pct}% of ${BUDGET_MINUTES} Mac-min used (${used_minutes} min, ${MONTH})"
+
+    # Desktop notification beside PagerDuty (plan 2026-11-27-retire-github-actions
+    # D3). Best effort: no session bus (a headless run) must not fail the check.
+    if [ "$DRY_RUN" != "1" ] && command -v notify-send >/dev/null 2>&1; then
+        local urgency=normal
+        [ "$severity" = critical ] && urgency=critical
+        notify-send -u "$urgency" -a "Codemagic budget" "Codemagic ${threshold}% threshold" "$summary" 2>/dev/null || true
+    fi
 
     if [ -z "$PAGERDUTY_ROUTING_KEY" ] || [ "$DRY_RUN" = "1" ]; then
         echo "  would alert [${severity}] ${summary}  (no routing key or DRY_RUN=1)"

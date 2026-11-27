@@ -11,10 +11,12 @@ mutation, asking for confirmation each time. Nothing is stored blindly.
 anything — start there if you just want to know where you stand.
 
 There is no `task deploy` counterpart here: WorldFoundry has no Terraform and nothing to
-provision. This is pure credential bootstrap for CI, specifically to make
-[`.github/workflows/codemagic-budget.yml`](../.github/workflows/codemagic-budget.yml) live —
-it is inert until all three of `secrets.CODEMAGIC_API_TOKEN`, `vars.WF_CODEMAGIC_APP_ID` and
-`secrets.PAGERDUTY_ROUTING_KEY` exist on [wbniv/WorldFoundry](https://github.com/wbniv/WorldFoundry).
+provision. This is pure credential bootstrap for the Codemagic budget monitor, the
+`codemagic-budget.timer` user timer installed by `scripts/install-codemagic-budget.sh`
+(it replaced the GitHub workflow when GitHub Actions was retired on 2026‑11‑27). The timer
+reads the token and app id from `~/.config/codemagic/` and the PagerDuty key from SSM
+`/wf/pagerduty-routing-key`. The GitHub secret and variable copies setup still writes are no
+longer read; [the retirement plan](plans/2026-11-27-retire-github-actions.md) removes them.
 
 Per-project credential discipline applies here the same as everywhere else: WorldFoundry gets
 its own `wf-terraform` AWS user and its own `/wf/*` SSM namespace — never borrowed from
@@ -143,13 +145,15 @@ The script prints a summary of all five items at the end of every run. Once they
 green, smoke-test the monitor without paging anyone:
 
 ```sh
-gh workflow run codemagic-budget.yml -R wbniv/WorldFoundry -f dry_run=true
-gh run list --workflow=codemagic-budget.yml -R wbniv/WorldFoundry --limit 1
+DRY_RUN=1 scripts/codemagic-budget-run.sh
+bash scripts/install-codemagic-budget.sh      # installs and starts the hourly timer
+journalctl --user -u codemagic-budget -n 10   # what the last timer run printed
 ```
 
 Cross-check the `used=` minutes figure it prints against the Codemagic dashboard. To exercise
-the threshold logic end to end, re-run with `-f override_minutes=1 -f dry_run=true`, which
-forces all three thresholds to cross while still never POSTing to PagerDuty.
+the threshold logic end to end, run `STATE_FILE=$(mktemp) BUDGET_MINUTES=1 DRY_RUN=1
+scripts/codemagic-budget-run.sh`, which forces all three thresholds to cross while never
+POSTing to PagerDuty or touching the real state file.
 
 ## Migrating to a new machine
 

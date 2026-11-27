@@ -1,0 +1,11 @@
+[Unit]
+Description=Codemagic budget check: hourly 06:00-22:00 UTC, plus 00:00 UTC for the month rollover
+
+[Timer]
+OnCalendar=*-*-* 06..22:00:00 UTC
+OnCalendar=*-*-* 00:00:00 UTC
+Persistent=true
+RandomizedDelaySec=2min
+
+[Install]
+WantedBy=timers.target
