@@ -238,9 +238,11 @@ def main() -> int:
                     print(f'        {why}')
     bad = sorted(level for level in fails if level not in known)
     stale = sorted(level for level, nums in rows if level in known and not nums[3])
+    in_known = sum(nums[3] for level, nums in rows if level in known)
     print(f'{len(rows)} levels{mode}, {totals[0]} scripts: {totals[1]} compiled, {totals[2]} PILOT, '
-          f'{totals[3]} failed; {len(bad)} levels FAIL' + (': ' + ', '.join(bad) if bad else '')
-          + f'; {len(fails) - len(bad)} known broken' + (f'; {len(stale)} STALE: ' + ', '.join(stale) if stale else ''))
+          f'{in_known} in {len(fails) - len(bad)} known-broken sources, {totals[3] - in_known} failing elsewhere; '
+          f'{len(bad)} levels FAIL' + (': ' + ', '.join(bad) if bad else '')
+          + (f'; {len(stale)} STALE: ' + ', '.join(stale) if stale else ''))
     return 1 if bad or stale else 0
 
 

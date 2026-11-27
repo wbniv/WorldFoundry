@@ -8,7 +8,7 @@ This is the evidence for the TODO item **"[T5] Evaluate the 22 built levels no p
 
 A fixture or experiment is judged only on two questions: is it still a useful test, and does its source still rebuild. Only a real level can get "keep + upgrade". Nothing has been deleted or changed; the verdicts are suggestions, and the **Decide** list at the end is for Will.
 
-**Rebuilds:** `aquarium_idle` and the four `style_*` levels failed to rebuild on 2026‑11‑22, and `pilot_demo` has no tracked `.lev`. A separate agent is fixing all six (in progress 2026‑11‑27), so this page does not investigate them. Every other id with a source folder rebuilt in a scratch copy in the container. The two regression fixtures have no folder: `tests/generate_teleport_level.py` generates them.
+**Rebuilds:** `aquarium_idle` and the four `style_*` levels failed to rebuild on 2026‑11‑22, and `pilot_demo` has no tracked `.lev`. Diagnosed and fixed on 2026‑11‑27 ([plan](../../plans/2026-11-27-level-scripts-and-rebuilds.md)): the four `style_*` levels now build from a clean clone (their asset symlinks are committed; built today they differ from the committed outputs because the reef tiles were repainted on 2026‑11‑10, so the outputs were not replaced); `aquarium_idle` builds through `task aquarium-idle-level` (its meshes come from Blender by design); `pilot_demo` through `task pilot-demo-level`. The same plan fixed the seven Director scripts below that stopped at `zforth unknown token`. Every other id with a source folder rebuilt in a scratch copy in the container. The two regression fixtures have no folder: `tests/generate_teleport_level.py` generates them.
 
 **Screenshots:** each tracked `-standalone.iff` was run headless in `wf-linux-test` (Xvfb with Mesa, today's Debug engine), and the frame shown is the one at 4 s of simulated time (`-rate20 --capture-frame=80`). The engine exits by itself after frame 90, so no sleep was used. "Script error" means the level's Forth Director no longer compiles on today's engine, so its scripted content is missing from the frame. "⚠" marks a test or script that breaks if the level is deleted.
 
@@ -19,13 +19,13 @@ A fixture or experiment is judged only on two questions: is it still a useful te
 | `teleport_regression` | fixture | cross‑room player teleports, camera jump | ⚠ ctest `cross_room_teleports` (+ `_mutation`) | generator | 64 KB | **keep** |
 | `unloaded_actor_regression` | fixture | teleport out of an unloaded source room | ⚠ ctest `unloaded_actor_teleports` | generator | 64 KB | **keep** |
 | `mm_practice` | fixture | an old‑format `.lvl` (pre‑LevelObj fields) | ⚠ ctest `levelobj_short_record_mm_practice`, ⚠ `test_levelobj_fields.py`, ⚠ `test_editable_objects_export.py` | yes, but **never recompile** (the test pins its 568‑byte record) | 0.4 MB | **keep as‑is** |
-| `style_flat_anime` | fixture | GL = Metal for the untextured anime (S3) shading | ⚠ `style-scene.json` → `test_style_shading_invariant.py`, Metal CI | being fixed | 13.0 MB | **keep** |
-| `style_flat_realistic` | fixture | the same for realistic (S1) | ⚠ the same | being fixed | 13.5 MB | **keep** |
-| `style_geom_anime` | fixture | GL = Metal for the reef shell and rocks, S3 | ⚠ the same | being fixed | 12.9 MB | **keep** |
-| `style_geom_realistic` | fixture | the same for S1 | ⚠ the same | being fixed | 13.4 MB | **keep** |
-| `aquarium_idle` | fixture | clownfish idle‑rig regression (the fish in every tank) | ⚠ `test_aquarium_idle.py`, ⚠ `test_wall_clock.py`, Taskfile | being fixed | 0.5 MB | **keep** |
+| `style_flat_anime` | fixture | GL = Metal for the untextured anime (S3) shading | ⚠ `style-scene.json` → `test_style_shading_invariant.py`, Metal CI | yes, clean clone | 13.0 MB | **keep** |
+| `style_flat_realistic` | fixture | the same for realistic (S1) | ⚠ the same | yes, clean clone | 13.5 MB | **keep** |
+| `style_geom_anime` | fixture | GL = Metal for the reef shell and rocks, S3 | ⚠ the same | yes, clean clone | 12.9 MB | **keep** |
+| `style_geom_realistic` | fixture | the same for S1 | ⚠ the same | yes, clean clone | 13.4 MB | **keep** |
+| `aquarium_idle` | fixture | clownfish idle‑rig regression (the fish in every tank) | ⚠ `test_aquarium_idle.py`, ⚠ `test_wall_clock.py`, Taskfile | yes, with Blender step | 0.5 MB | **keep** |
 | `snowgoons-blender` | fixture | Blender‑scaffold level; editor round trip | ⚠ wf_edit ctests, ⚠ web editor; the folder is also the **source of the shipped Snowgoons** | yes (script error) | ~0.2 MB own | **keep** |
-| `pilot_demo` | fixture | PILOT‑language script running in a level | ⚠ `tests/pilot/in_level_demo.pilot`, web‑build preload | being fixed | 2.4 MB | **keep** |
+| `pilot_demo` | fixture | PILOT‑language script running in a level | ⚠ `tests/pilot/in_level_demo.pilot`, web‑build preload | yes, with Blender step | 2.4 MB | **keep** |
 | `condo_639_640_tour` | fixture | self‑walking tour; checks every room is entered; records `tour-639.mp4` (640×480) | ⚠ `tests/record_condo_639_tour.py`, ⚠ Taskfile `tour-condo-639`/`video-condo-639` | yes (needs Will's condo `.blend`) | 10.7 MB | **keep** |
 | `condo_639_640_touch` | experiment | two‑button touch camera profile for the condo | `tests/verify_condo_camera_touch.py` (manual), Taskfile `condo-touch`; no app ships the profile | yes (needs the `.blend`) | 10.7 MB | **retire** unless a phone build is planned |
 | `filesys` | experiment | FSN filesystem browser (Forth Director, C layout) | ⚠ `test_level_iff_carries_its_lvl.py`, ⚠ `check-filesys-rebuild.sh` | yes (script error: no towers) | 0.4 MB | **keep**, fix its script |

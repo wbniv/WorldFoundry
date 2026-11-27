@@ -1,9 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/351be3175) | Classify Seahorse Grid as shipped by its screensaver app |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/cb251fec8) | Unreachable levels review: reframe as tests, experiments and two real levels (Will) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/22e3d6e66) | Unreachable levels: one-page review of the 22 with screenshots and suggested verdicts |
 
 <!--history-meta v1
+351be3175	author	Will Norris
+351be3175	added	3
+351be3175	deleted	3
+351be3175	files	1
 cb251fec8	author	Will Norris
 cb251fec8	added	69
 cb251fec8	deleted	294
