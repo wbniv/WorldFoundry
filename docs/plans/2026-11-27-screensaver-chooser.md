@@ -1,6 +1,6 @@
 # Aquarium and Clocks: a "use for screensaver" chooser behind the Dream's settings link
 
-**Status:** draft for Will's decisions, 2026‑11‑27. Nothing is built. TODO item: "Aquarium and Clocks: 'use for screensaver' chooser behind the Dream's settings link" (`[T4]`). It follows Will's decision 1 of 2026‑11‑26 in Homeboard's [screensaver integration investigation](../../../homeboard-tv/docs/investigations/2026-11-26-screensaver-integration.md): each app offers the choice itself, reached through Android's `settingsActivity` link, and only the app writes the saved choice. **No engine change is needed** for the recommended design; the one option that would need one (D1, the engine's level menu) is marked.
+**Status:** decided by Will, 2026‑11‑27 (D4 changed; see the note under Decisions); being built. Was: draft for Will's decisions. TODO item: "Aquarium and Clocks: 'use for screensaver' chooser behind the Dream's settings link" (`[T4]`). It follows Will's decision 1 of 2026‑11‑26 in Homeboard's [screensaver integration investigation](../../../homeboard-tv/docs/investigations/2026-11-26-screensaver-integration.md): each app offers the choice itself, reached through Android's `settingsActivity` link, and only the app writes the saved choice. **No engine change is needed** for the recommended design; the one option that would need one (D1, the engine's level menu) is marked.
 
 ## Context: what is true today
 
@@ -19,6 +19,15 @@
 ## Decisions for Will
 
 Each has a recommendation; "if not" says what the other answer costs.
+
+**Decided by Will, 2026‑11‑27:** "D1-D3,D5-D10: yes, ok. D4: no, don't show 'random' as choice in list." So
+the chooser lists only the app's levels, with no Random row. Random stays where it already works: an app
+nobody has chosen for keeps today's `random` (nothing saved means `random`), the coordinator's
+`setSetting tank:random` / `clock:random` is unchanged, and D9's fallback for a missing saved level still
+plays a random level. The list then marks no row as Saved and its status line says a random level plays
+until a level is chosen; D9's notice says the same instead of marking a Random row "Plays now". Choosing a
+level saves it, and there is no way back to Random from the chooser (Undo still restores the previous
+saved value while on the screen, including `random`). D5's Preview takes a level id only.
 
 | # | Question | Recommendation | What changes | If not |
 |---|---|---|---|---|
