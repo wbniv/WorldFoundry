@@ -18,7 +18,6 @@
 
 - [T4] **Persist level settings across launches.** Plan written, **awaiting Will's review** (D1–D12, Q1–Q7): one engine-owned per-package store, keyed by level id + schema + field key, saved on Apply and applied at level load for the app and the Dream; Reset to defaults in the form. [Plan](docs/plans/2026-11-27-persist-level-settings.md). T4: crosses engine, every host and the level format. Background: [Discus palette plan](docs/plans/2026-11-23-discus-palette-selector.md)
 
-- [T5] **Candle flames: keep A or switch to B? (Will's call)** Measured on cast1 2026‑11‑27: B (the deformed flame) costs **+1.39 ms main-thread CPU a frame** over the shipped A (23.58 vs 22.19 ms; the plan's gate allowed 0.1 ms), in the director (+1.76 ms, 120 curve writes a frame in zForth) and the deformer (+0.44 ms); both hold 30 fps, B's worst window 23.8 of 33.4 ms. Near up B's flame moves visibly more smoothly; at the village's distance on cast1 the two are hard to tell apart. Recommendation: **keep A** (the gate fails, and B spends a fifth of the remaining headroom for a difference visible only up close); if B's look is wanted, the cheaper route is moving the per-curve rule out of Forth into the engine. [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md) step 0, [look](docs/plans/2026-11-22-cuckoo-village-candle-flicker/look-real.html), [evidence](docs/diagnostics/candle-flicker-ab-cast1-2026-11-27/README.md)
 
 - [T3] **Cuckoo Village: the Player falls out of the room in a desktop Debug run** (found 2026‑11‑27). The Player (Physics mobility, at (0, −3, 1)) falls through the ground and leaves the room at z = −20 after about 70 frames; the Debug engine then stops ("not in any room"), so desktop captures of the village cannot run longer. The study builds hold the Player; find why it does not land. [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md) step 5
 
@@ -261,6 +260,7 @@
 
 ## Done
 
+- ✅ 2026‑11‑27 — [candle-flames-a] Keep A (settled by Will 2026‑11‑22, confirmed 2026‑11‑27); B measured +1.39 ms on cast1. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
 - ✅ 2026‑11‑27 — [candle-ab] B measured on cast1: +1.39 ms CPU a frame over A; clips and near study made; camera aim resolved. See [plan](docs/plans/2026-11-22-cuckoo-village-candle-flicker.md).
 - ✅ 2026‑11‑27 — [cuckoo-size-gate] Gate re-set to 9 MiB (Will); enforced by a test; level 8.79 MB. See [plan](docs/plans/2026-11-22-cuckoo-village-flowers.md).
 - ✅ 2026‑11‑27 — [armv8-32bit-build] Keep ARMv7 (Will): ARMv8 gave +0.4 % on cast1, no change on cast2. See [plan](docs/plans/2026-11-26-armv8-32bit-build.md).
