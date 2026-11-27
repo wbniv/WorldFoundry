@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/8b8637c7a) | plan: Will decides the screensaver chooser (D4: no Random row) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+8b8637c7a	author	Will Norris
+8b8637c7a	added	10
+8b8637c7a	deleted	1
+8b8637c7a	files	1
+8b8637c7a	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqQzN1oGqYJXjCkzVJ1
 88befddc5	author	Will Norris
 88befddc5	added	190
 88befddc5	deleted	0

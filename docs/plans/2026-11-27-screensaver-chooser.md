@@ -48,6 +48,27 @@ Rejected outright, not offered: saving from the launcher's engine menu (it would
 
 One activity in `src/main`, shared by the Aquarium and WF Clocks, declared only in their two flavour manifests. It is a client of the app's own settings provider: it reads and writes the saved choice **through the provider**, never through SharedPreferences.
 
+### One chooser for every World Foundry screensaver bundle
+
+Will, 2026‑11‑27: "you should be able to reuse the same menu chooser code for both aquarium and 3d
+clocks. and for all wf screensaver bundles in the future, too". So the chooser is one piece of code with
+no per-app branches, ids or strings, and a new bundle gets it with no new Java:
+
+- **Everything per-app is data.** The list comes from the bundle's roster (`levels.manifest`, read by
+  `LevelCatalog`); the provider is found from the Dream's existing
+  `org.worldfoundry.screensaver.SETTINGS_AUTHORITY` meta-data; the level setting id the provider stores
+  (`tank` for the Aquarium, `clock` for WF Clocks) is one declared value, or both providers also accept one
+  shared key such as `level`. Whichever is chosen, the coordinator's existing `tank:<id>` and
+  `clock:<id>` keep working unchanged.
+- **Whether a bundle offers the chooser is data too.** A bundle whose roster has more than one level
+  declares the chooser activity and points its Dream at `dream_chooser.xml`; a one-level bundle (Seahorse
+  Grid, D7) keeps the empty `dream.xml`.
+- **Adding it to a new bundle** is a few manifest lines, the Dream XML and the roster, written up as a
+  how-to in `android/screensaver/README.md`.
+- **A source guard test** fails if the chooser or its helpers name a particular bundle (`aquarium`,
+  `clocks`, a hard-coded `tank` or `clock` id), and pure tests build the list and the save calls from a
+  roster and a setting id they are given.
+
 **Rejected: the chooser calling `TankChoice` directly.** It is shorter, but it must then run in the main process to share the provider's cached preferences; the main process is ended by `TankPlayer.stop` after every launcher run, and a second writer breaks the `LaunchModeTest` guard. In its own process it would hold a stale copy of the `screensaver` file and could overwrite an orientation the coordinator saved. Through the provider there is one writer, one validation and one list, the same one the coordinator's tray shows. The two are close; this one wins on keeping the writer single.
 
 ```mermaid
