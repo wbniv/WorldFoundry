@@ -560,8 +560,8 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
         char vramWidth[] = "--vram-width=2048";
         char vramHeight[] = "--vram-height=2048";
         char noFps[] = "--no-fps";
-        char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr};
-        const int argc = menu ? 8 : 9;
+        char* argv[] = {arg0, slotWidth, slotHeight, permWidth, permHeight, vramWidth, vramHeight, noFps, arg1, nullptr, nullptr};
+        int argc = menu ? 8 : 9;
         argv[argc] = nullptr;
         // The flavor's own VRAM sizes, if it ships a wf_args.txt (argv[1..6] are slot, perm and page width/height).
         char overrides[6][48];
@@ -572,6 +572,18 @@ Java_org_worldfoundry_screensaver_TankPlayer_nativeRun(
                 argv[1 + i] = overrides[i];
                 __android_log_print(ANDROID_LOG_INFO, "wf_dream", "vram override: %s", overrides[i]);
             }
+        }
+        // A `--frame-profile` line in wf_args.txt turns on the engine's CPU frame profile (frame-profile: lines on
+        // stderr, so in wf.log, every 5 s): the seahorse benchmark's method of measuring a variant APK whose only
+        // change is its assets. No shipped flavor's file has the line. It goes before the level, which stays last.
+        // docs/plans/2026-11-22-cuckoo-village-candle-flicker.md, verification step 0.
+        char frameProfile[] = "--frame-profile";
+        char frameProfileLine[48];
+        if (vramOverride(frameProfile, frameProfileLine, sizeof frameProfileLine)) {
+            for (int i = argc; i > 1; --i) argv[i] = argv[i - 1];
+            argv[1] = frameProfile;
+            argv[++argc] = nullptr;
+            __android_log_print(ANDROID_LOG_INFO, "wf_dream", "wf_args.txt: %s", frameProfile);
         }
         __argc = argc;
         __argv = argv;

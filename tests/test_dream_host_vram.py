@@ -25,7 +25,7 @@ def host_argv():
     strings.update({n: '0' for n in re.findall(r'char (\w+)\[\d+\];', source)})
     argv = [strings[n] for n in entries]
     # A level plays with every entry; the menu (kMenuLevel, -1) ends argv one early, before the level.
-    counts = re.search(r'const int argc = menu \? (\d+) : (\d+);', source)
+    counts = re.search(r'int argc = menu \? (\d+) : (\d+);', source)
     assert counts, 'dream_host.cc: the menu/level argc choice not found'
     assert re.search(r'argv\[argc\] = nullptr;', source)
     assert re.search(r'__argc = argc;', source) and re.search(r'HALStart\(argc, argv', source)
@@ -143,3 +143,18 @@ def test_clocks_flavor_slot_fits_every_texture_page_in_its_bundle():
     assert re.search(r'argv\[1 \+ i\] = overrides\[i\];', host)
     other = [p for p in (ROOT / 'android/screensaver/src').glob('*/assets/wf_args.txt') if p.parent.parent.name != 'clocks']
     assert other == [], f'a flavor other than clocks overrides the VRAM sizes: {other}'
+
+
+def test_frame_profile_line_goes_before_the_level_and_no_flavor_ships_it():
+    """2026-11-27 (candle flicker, verification step 0): the seahorse benchmark measures variant APKs whose only change is their assets,
+    with `--frame-profile` added to assets/wf_args.txt. The Dream host read only the six VRAM lines of that file, so the Clocks flavor
+    silently ran without the profile and no frame-profile lines reached wf.log. The host now passes a `--frame-profile` line through,
+    as the first flag (the level index, a positional argument, stays last); no shipped flavor may carry it."""
+    source = HOST.read_text()
+    block = source[source.index('char frameProfile[] = "--frame-profile";'):source.index('__argc = argc;')]
+    assert 'vramOverride(frameProfile' in block, 'the host does not look for --frame-profile in wf_args.txt'
+    assert 'argv[1] = frameProfile;' in block and 'argv[++argc] = nullptr;' in block
+    argv_decl = re.search(r'char\* argv\[\] = \{([^}]*)\};', source).group(1)
+    assert argv_decl.replace(' ', '').endswith('nullptr,nullptr'), 'argv needs a spare slot for the inserted flag'
+    for args in sorted((ROOT / 'android/screensaver/src').glob('*/assets/wf_args.txt')):
+        assert '--frame-profile' not in args.read_text(), f'{args} ships --frame-profile'
