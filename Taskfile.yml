@@ -2424,9 +2424,14 @@ tasks:
       - bash scripts/aquarium-levels.sh regenerate
 
   aquarium-check:
-    desc: "Check the committed Aquarium outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file; fails listing the stale files. CI runs it (.github/workflows/level-outputs.yml): task aquarium-check [-- --ref REF --keep]"
+    desc: "Check the committed Aquarium outputs are fresh: rebuild HEAD's inputs in a scratch copy (build-docker/level-check/) and compare every tracked file; fails listing the stale files. The local CI's aquarium-check step runs it (scripts/local-ci.sh): task aquarium-check [-- --ref REF --keep]"
     cmds:
       - bash scripts/aquarium-levels.sh check {{.CLI_ARGS}}
+
+  blender-matrix:
+    desc: "Run the wf_blender add-on export test against upstream Blender 4.0.2, 4.2.21, 4.5.10 and 5.0.1 in the Blender image (or name versions: task blender-matrix -- 4.2.21). Run before widening the add-on's apt Blender pin; replaced the GitHub matrix workflow"
+    cmds:
+      - bash scripts/blender-matrix.sh {{.CLI_ARGS}}
 
   linux-container:
     desc: "Run a command in the Linux test container (repo at /src, build-docker/ at /build): task linux-container -- ctest --test-dir /build/listener"

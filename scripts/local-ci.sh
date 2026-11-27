@@ -1,22 +1,31 @@
 #!/usr/bin/env bash
 # local-ci.sh: the local CI. Builds wf_game and runs the renderer-freshness and snowgoons
-# arena-faces tests on one commit, in a throwaway sparse clone, in the Linux test container.
+# arena-faces tests on one commit, in a throwaway sparse clone, in the Linux test container;
+# when their inputs changed, also the Aquarium-outputs check and the Blender add-on test
+# in the Blender image (these replaced two GitHub workflows on 2026-11-27).
 # Plan: docs/plans/2026-11-14-local-ci.md. Installed as a systemd user timer by
 # scripts/install-local-ci.sh (which runs this with --poll).
 set -euo pipefail
 
 usage() {
     cat <<'EOF2'
-Usage: scripts/local-ci.sh [-h|--help] [--poll] [--tests-from REV] [--builder B] [--keep N] [--no-notify] [COMMIT]
+Usage: scripts/local-ci.sh [-h|--help] [--poll] [--tests-from REV] [--builder B] [--keep N] [--no-notify] [--only STEPS] [COMMIT]
 
 Builds wf_game and runs the CI tests on COMMIT (default: origin/2026-new-level, fetched
 first) in a throwaway sparse clone under ~/.cache/wf-local-ci-scratch, never in this
-checkout. Every build and test runs in the wf-linux-test container.
+checkout. Every build and test runs in a container: wf-linux-test, or wf-blender for the
+Blender steps.
 
 Steps:   build            the engine, by --builder (below)
          arena-faces-up   tests/test_snowgoons_arena_faces_up.py
          renderer-fresh   tests/test_renderer_references_fresh.py (under xvfb-run)
-A pytest skip counts as a failure.
+         aquarium-check   scripts/aquarium-levels.sh check --ref COMMIT (Blender image);
+                          only when the Aquarium inputs changed
+         blender-addon    maturin wheel + tests/test_blender_addon_export.py (Blender
+                          image); only when wf_blender, wf_py or its fixture changed
+A pytest skip counts as a failure; "SKIP (not touched)" does not. What changed is the
+range since the last polled commit (--poll), else the commit against its first parent;
+WF_CI_ALL_STEPS=1 runs every step. Other Blender versions: task blender-matrix.
 
 Options:
   --poll            timer mode: do nothing if COMMIT is the one the last --poll took
@@ -30,6 +39,9 @@ Options:
                     build_game and cmake are the old names of dev and release
   --keep N          keep the newest N result directories (default 20)
   --no-notify       no desktop notification on failure
+  --only S1,S2      run only these steps; the rest read "SKIP (not selected)", which is
+                    not a failure. Without build, the engine steps are skipped and the
+                    run needs no WF_CI_BUILD_GB headroom
 
 The build scripts (scripts/build-wf-game.sh, build-wf-game-container.sh,
 in-linux-container.sh) always come from this checkout; cmake/wf-game-dev.cmake comes
@@ -55,7 +67,7 @@ Environment:
 EOF2
 }
 
-poll=0 tests_from="" builder="${WF_CI_BUILDER:-dev}" keep=20 notify=1 commit=""
+poll=0 tests_from="" builder="${WF_CI_BUILDER:-dev}" keep=20 notify=1 commit="" only=""
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help) usage; exit 0 ;;
@@ -64,6 +76,7 @@ while [ $# -gt 0 ]; do
         --builder) [ $# -ge 2 ] || { usage >&2; exit 2; }; builder="$2"; shift 2 ;;
         --keep) [ $# -ge 2 ] || { usage >&2; exit 2; }; keep="$2"; shift 2 ;;
         --no-notify) notify=0; shift ;;
+        --only) [ $# -ge 2 ] || { usage >&2; exit 2; }; only="$2"; shift 2 ;;
         -*) echo "local-ci: unknown option $1" >&2; usage >&2; exit 2 ;;
         *) [ -z "$commit" ] || { usage >&2; exit 2; }; commit="$1"; shift ;;
     esac
@@ -89,6 +102,9 @@ unset WF_CONTAINER_IMAGE   # the default, linux-test
 log() { printf '%s local-ci: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
 die() { log "ERROR: $*" >&2; exit 2; }
 
+selected() { [ -z "$only" ] || [[ ",$only," == *",$1,"* ]]; }
+selected build || build_gb=0
+
 # ── Preflight: disk and Docker, before taking anything ───────────────────────────────
 mkdir -p "$results" "$scratch"
 for dir in "$results" "$scratch"; do
@@ -111,13 +127,38 @@ echo $$ >"$results/.lock.pid"
 git -C "$root" fetch -q origin "$branch"
 commit="${commit:-origin/$branch}"
 sha="$(git -C "$root" rev-parse --verify -q "$commit^{commit}")" || die "no such commit: $commit"
+prev=""
 if [ "$poll" = 1 ]; then
-    if [ "$(cat "$results/last-polled" 2>/dev/null || true)" = "$sha" ]; then
+    prev="$(cat "$results/last-polled" 2>/dev/null || true)"
+    if [ "$prev" = "$sha" ]; then
         log "nothing new: origin/$branch is still ${sha:0:12}"
         exit 0
     fi
     echo "$sha" >"$results/last-polled"
 fi
+# What changed, for the path-filtered steps: in --poll mode everything since the last
+# polled commit (several pushes can land between ticks); otherwise the commit itself
+# against its first parent. WF_CI_ALL_STEPS=1 runs every step regardless.
+base=""
+if [ -n "$prev" ] && git -C "$root" merge-base --is-ancestor "$prev" "$sha" 2>/dev/null; then
+    base="$prev"
+elif git -C "$root" rev-parse --verify -q "$sha^" >/dev/null; then
+    base="$sha^"
+fi
+if [ -n "$base" ]; then
+    changed="$(git -C "$root" diff --name-only "$base" "$sha")"
+else
+    changed=""   # a root commit: run everything
+    WF_CI_ALL_STEPS=1
+fi
+touches() {   # ERE matched against each changed path; true when any matches
+    [ "${WF_CI_ALL_STEPS:-0}" = 1 ] && return 0
+    grep -qE "$1" <<<"$changed"
+}
+# The paths: list of the retired .github/workflows/level-outputs.yml, as regexes.
+aquarium_paths='^(wflevels/aquarium[^/]*/|wflevels/aquarium[^/]*\.iff$|wflevels/aquarium-menu\.manifest$|wflevels/snowgoons-blender/|wftools/|wfsource/source/oas/|wfsource/source/game/shell[^/]*\.fth$|wfsource/source/game/ui-font\.wfga$|scripts/|docker/Dockerfile\.blender)'
+# What tests/test_blender_addon_export.py exercises (the retired workflow ran on every push).
+blender_paths='^(wftools/wf_blender/|wftools/wf_py/|tests/test_blender_addon_export\.py$|tests/blender_runner/|tests/fixtures/qbert_practice-golden\.lev$|wflevels/qbert_practice/|docker/Dockerfile\.blender)'
 rev=""
 if [ -n "$tests_from" ]; then
     rev="$(git -C "$root" rev-parse --verify -q "$tests_from^{commit}")" || die "no such commit: $tests_from"
@@ -177,7 +218,7 @@ failed=()
 record() {   # name result seconds
     printf '%s\t%s\t%s\n' "$1" "$2" "$3" >>"$out/result.tsv"
     log "$1: $2 (${3} s)"
-    case "$2" in PASS) ;; *) failed+=("$1") ;; esac
+    case "$2" in PASS|"SKIP (not touched)"|"SKIP (not selected)") ;; *) failed+=("$1") ;; esac
 }
 # A pytest step passes only on exit 0 with at least one pass and no skip.
 pytest_verdict() {   # rc logfile
@@ -191,6 +232,11 @@ pytest_verdict() {   # rc logfile
 }
 in_container() { (cd "$wt" && scripts/in-linux-container.sh "$@"); }
 
+built=0
+if ! selected build; then
+    echo "not run: --only $only" >"$out/build.log"
+    record build "SKIP (not selected)" 0
+else
 s=$SECONDS rc=0
 if [ "$builder" = release ]; then
     engine=/build/wf-game/src/engine/wf_game host_engine="$wt/build-docker/wf-game/src/engine/wf_game"
@@ -213,13 +259,22 @@ else
     record build FAIL $((SECONDS - s))
     built=0
 fi
+fi
 
+if selected arena-faces-up; then
 s=$SECONDS rc=0
 in_container python3 -m pytest -v -rs -p no:cacheprovider tests/test_snowgoons_arena_faces_up.py \
     >"$out/arena-faces-up.log" 2>&1 || rc=$?
 record arena-faces-up "$(pytest_verdict "$rc" "$out/arena-faces-up.log")" $((SECONDS - s))
+else
+    echo "not run: --only $only" >"$out/arena-faces-up.log"
+    record arena-faces-up "SKIP (not selected)" 0
+fi
 
-if [ "$built" = 1 ]; then
+if ! selected renderer-fresh; then
+    echo "not run: --only $only" >"$out/renderer-fresh.log"
+    record renderer-fresh "SKIP (not selected)" 0
+elif [ "$built" = 1 ]; then
     s=$SECONDS rc=0
     # bash -c keeps xvfb-run from being PID 1; the trailing exit keeps bash from exec-ing it.
     WF_CONTAINER_ENV="WF_GAME=$engine" in_container bash -c 'set -euo pipefail; rc=0
@@ -230,6 +285,41 @@ if [ "$built" = 1 ]; then
 else
     echo "not run: the engine build failed" >"$out/renderer-fresh.log"
     record renderer-fresh "SKIP (no engine)" 0
+fi
+
+# Committed Aquarium outputs are fresh (replaces .github/workflows/level-outputs.yml):
+# rebuild the commit's inputs in the Blender image and compare every tracked output.
+if ! selected aquarium-check; then
+    echo "not run: --only $only" >"$out/aquarium-check.log"
+    record aquarium-check "SKIP (not selected)" 0
+elif touches "$aquarium_paths"; then
+    s=$SECONDS rc=0
+    bash "$root/scripts/aquarium-levels.sh" check --ref "$sha" >"$out/aquarium-check.log" 2>&1 || rc=$?
+    if [ "$rc" -eq 0 ]; then record aquarium-check PASS $((SECONDS - s))
+    else record aquarium-check FAIL $((SECONDS - s)); fi
+else
+    echo "not run: nothing under the Aquarium inputs changed${base:+ since ${base:0:12}}" >"$out/aquarium-check.log"
+    record aquarium-check "SKIP (not touched)" 0
+fi
+
+# The wf_blender add-on exports qbert_practice to its golden .lev (replaces
+# .github/workflows/blender-addon-tests.yml): build the wf_core wheel with maturin and run
+# the test against the Blender image's Blender. Cargo's download cache persists between runs.
+if ! selected blender-addon; then
+    echo "not run: --only $only" >"$out/blender-addon.log"
+    record blender-addon "SKIP (not selected)" 0
+elif touches "$blender_paths"; then
+    s=$SECONDS rc=0
+    mkdir -p "$HOME/.cache/wf-local-ci-cargo"
+    WF_CONTAINER_IMAGE=blender WF_CONTAINER_MOUNTS="$HOME/.cache/wf-local-ci-cargo:/tmp/cargo" \
+        in_container bash -c 'set -euo pipefail
+            (cd wftools/wf_py && maturin build --release --quiet)
+            BLENDER_BIN="$(command -v blender)" python3 -m pytest -v -rs -p no:cacheprovider \
+                tests/test_blender_addon_export.py' >"$out/blender-addon.log" 2>&1 || rc=$?
+    record blender-addon "$(pytest_verdict "$rc" "$out/blender-addon.log")" $((SECONDS - s))
+else
+    echo "not run: nothing the add-on test covers changed${base:+ since ${base:0:12}}" >"$out/blender-addon.log"
+    record blender-addon "SKIP (not touched)" 0
 fi
 
 # ── Results ──────────────────────────────────────────────────────────────────────────

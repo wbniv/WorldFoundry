@@ -1,4 +1,17 @@
 | Date | Change |
 |------|--------|
-| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
-| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/7283034c) | test(wf_blender): matrix-test level exporter against Blender 4.0/4.2/4.5 |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c2) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/7283034c2) | test(wf_blender): matrix-test level exporter against Blender 4.0/4.2/4.5 |
+
+<!--history-meta v1
+84418c7c2	author	Will Norris
+84418c7c2	added	2
+84418c7c2	deleted	0
+84418c7c2	files	1
+84418c7c2	body	Every plan now carries an accurate Status (0 remaining with none). Breakdown:\n- Wave E: 28 no-status plans stamped (mostly DONE — the verify agent badly\n  under-reported completion; spot-checks corrected ~10 false-OPENs incl.\n  voice/video calling, android phase 2, blender test-matrix, debug-print-actors,\n  per-level palette, camera pullback, mm-2 level, wf-workspace-setup).\n- Wave B: 16 genuine backlog plans given accurate PARTIAL/OPEN text (the real\n  remaining work — video capture, steam SDK, lua-on, neural-forth examples,\n  asset-provider, codemagic budget, fetch-paper, …).\n- Wave C: apt-worldfoundry-org marked DONE — apt.worldfoundry.org serves HTTP 200\n  (external infra; no in-repo artifact by design).\n- Wave D: the 4 docs/qbert/plans duplicates marked DONE (features shipped).\n- runtime-long-audit → DONE (F1–F6 + pass-2; only F7 left); walker-rom-grounded\n  → ABANDONED (low-ROI, 89761d17).\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+7283034c2	author	Will Norris
+7283034c2	added	102
+7283034c2	deleted	0
+7283034c2	files	1
+7283034c2	body	End-to-end harness for the wf_blender add-on's level exporter\n(WF_OT_export_level), validated against three Blender versions in\nparallel. Closes the test-matrix TODO that drives the\nworldfoundry-blender-addons apt pin (currently strict-pinned to\n4.0.2 because that's all we'd validated; this work unblocks widening).\n\nPhase 1+2 results: byte-identical 73,103-byte export across Blender\n4.0.2, 4.2.21 LTS, and 4.5.10 LTS. No version-specific goldens\nneeded; the pyo3 abi3 build of wf_core + deterministic export logic\nproduce identical bytes regardless of host Blender's Python version.\n\nPhase 3: GitHub Actions matrix workflow runs the same test in CI\non every push + PR. Caches the Blender installs and Rust target dir.\n\nComponents:\n\n- scripts/install-blender.sh: download + SHA256-verify + unpack an\n  official Blender release tarball. Idempotent. -h/--help.\n- tests/blender_runner/run_export.py: headless invocation —\n  enables wf_blender, calls bpy.ops.wf.export_level, exits on error.\n- tests/test_blender_addon_export.py: pytest test. Builds a\n  BLENDER_USER_RESOURCES sandbox (no --factory-startup so the\n  sandbox's addon path is honoured), drops wf_core.so beside the\n  addon source, runs Blender headless, byte-compares output against\n  tests/fixtures/qbert_practice-golden.lev. Skips if $BLENDER_BIN\n  is unset (so general pytest runs on dev machines don't fail).\n- tests/fixtures/qbert_practice-golden.lev: 73K committed golden,\n  generated on Blender 4.0.2. Regen via diff-then-cp when an\n  intentional format change lands.\n- .github/workflows/blender-addon-tests.yml: matrix CI job over\n  [4.0.2, 4.2.21, 4.5.10]. Caches Blender installs by version key\n  and the Rust target dir by Cargo.lock hash.\n\nFollow-up (separate PR in worldfoundry.org): widen the\nworldfoundry-blender-addons Depends from `(<< 4.0.3)` to\n`(<< 4.6)` (or whatever band the matrix has validated). The CI\ngreen-on-each-version is the unblocker.\n\nPlan: docs/plans/2026-05-21-blender-version-test-matrix.md\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+-->

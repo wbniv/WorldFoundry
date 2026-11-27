@@ -4,7 +4,8 @@
 #
 # Used by:
 #   - the wf_blender add-on test matrix (tests/test_blender_addon_export.py)
-#   - GitHub Actions blender-addon-tests matrix workflow
+#   - task blender-matrix (scripts/blender-matrix.sh), which replaced the GitHub
+#     Actions blender-addon-tests matrix workflow on 2026-11-27
 
 set -euo pipefail
 

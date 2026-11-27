@@ -333,9 +333,11 @@ level outputs STALE: 2 of 1943 tracked files do not rebuild identically from 012
 Regenerate them with `task aquarium-regenerate`, then commit the changed files.
 ```
 
-CI runs the check on every push that touches a level input
-([`.github/workflows/level-outputs.yml`](../.github/workflows/level-outputs.yml)), with the image
-from `docker/Dockerfile.blender.public`, because GitHub cannot reach the lab registry.
+The local CI runs the check on every new commit on `origin/2026-new-level` that touches a
+level input: the `aquarium-check` step of [`scripts/local-ci.sh`](../scripts/local-ci.sh), in
+the Blender image. Run it alone with `scripts/local-ci.sh --only aquarium-check <commit>`. It
+replaced the GitHub workflow `level-outputs.yml` when GitHub Actions was retired on
+2026‑11‑27.
 
 For runtime use Taskfile entries: `task run-level -- wflevels/<level>.iff` (no bridge),
 `task run-debug -- wflevels/<level>.iff` (debug bridge on `:7777`).

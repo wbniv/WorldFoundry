@@ -117,7 +117,38 @@ Nothing new on AWS: a few SSM `SecureString` parameters are free in the standard
 ## Verification
 
 1. `bash scripts/local-ci.sh --no-notify <commit touching wflevels/aquarium_reef/>` shows an `aquarium-check` row with PASS, and on a commit touching neither path both new rows read SKIP.
+
+    Run with `--only` (added for this: the engine build needs 20 GB free and the disk had 8–10 GB; `WF_CI_MIN_FREE_GB=5` for the same reason). A commit touching neither path:
+    ```
+    $ WF_CI_MIN_FREE_GB=5 scripts/local-ci.sh --no-notify --only aquarium-check,blender-addon 02cedef1f
+    WF local CI   PASS
+    commit        02cedef1f645  todo: triage the chooser plan's captured deferrals
+    step                 result                 seconds
+    build                SKIP (not selected)    0
+    arena-faces-up       SKIP (not selected)    0
+    renderer-fresh       SKIP (not selected)    0
+    aquarium-check       SKIP (not touched)     0
+    blender-addon        SKIP (not touched)     0
+    ```
+    An Aquarium-input commit, `351be3175`: the step ran and **failed for a real reason**: `level outputs STALE: 38 of 2419 tracked files do not rebuild identically from 351be31757e6`, every tank and both bundles. Cause: `1cdea7cb2` changed the `snowgoons-blender` scaffold every tank imports and nothing regenerated them (GitHub's check was not running). Fixed by `task aquarium-regenerate`, `d2320285d`, then:
+    ```
+    $ WF_CI_MIN_FREE_GB=5 scripts/local-ci.sh --no-notify --only aquarium-check,blender-addon HEAD
+    commit        d2320285db9f  Aquarium tanks and bundles: rebuilt after 1cdea7cb2's scaffold script fix
+    aquarium-check       PASS                   309
+    blender-addon        SKIP (not touched)     0
+    level outputs fresh: all 2423 tracked files rebuild identically from d2320285db9f
+    ```
+    **PASS.**
 2. `bash scripts/local-ci.sh --no-notify <commit touching wftools/wf_blender/>` shows a `blender-addon` row with PASS.
+
+    The step builds the wheel (maturin 1.11.5 in the Blender image) and runs the test against Blender 5.0.1. On `1cdea7cb2` it **fails for a real reason**: `Export output differs from golden at byte 1072` (276,421 against 266,019 bytes; the other two tests pass). On the last commit GitHub passed, in the same container:
+    ```
+    $ WF_CI_ALL_STEPS=1 WF_CI_MIN_FREE_GB=5 scripts/local-ci.sh --no-notify --only blender-addon d6f6b7d70
+    local-ci: blender-addon: PASS (28 s)
+    WF local CI   PASS
+    ============================== 3 passed in 3.26s ===============================
+    ```
+    Bisected: `8cdd071dc`, `30e0526e9`, `583111c1b`, `41c48094a` PASS; `750a8db4a` and every later add-on commit FAIL. `750a8db4a` regenerated `qbert_practice.blend` without refreshing the golden; refreshing it with a review of later differences is a separate TODO item. **PASS** for the step (it runs, and it catches a real regression); the add-on test itself reads FAIL until the golden is refreshed.
 3. `systemctl --user list-timers codemagic-budget.timer` lists the timer, and `systemctl --user start codemagic-budget.service; journalctl --user -u codemagic-budget -n 5` prints this month's Mac minutes.
 
     ```

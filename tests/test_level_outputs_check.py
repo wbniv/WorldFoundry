@@ -1,8 +1,9 @@
 """The level-outputs freshness check: scripts/level-outputs-compare.py and the
 regenerate list of scripts/aquarium-levels.sh.
 
-The full check (task aquarium-check) needs Docker and the Blender image; CI runs it
-in .github/workflows/level-outputs.yml. These tests need only git and Python.
+The full check (task aquarium-check) needs Docker and the Blender image; the local CI
+runs it as its aquarium-check step (scripts/local-ci.sh). These tests need only git and
+Python.
 """
 import re
 import shutil

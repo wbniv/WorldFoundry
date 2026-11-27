@@ -71,3 +71,18 @@ ENV BLENDER_SYSTEM_SCRIPTS=/opt/wf-blender-scripts \
     WF_IN_CONTAINER=blender \
     HOME=/tmp
 WORKDIR /src
+
+# The Blender add-on test (tests/test_blender_addon_export.py, the local CI's blender-addon
+# step; it replaced .github/workflows/blender-addon-tests.yml on 2026-11-27) needs pytest
+# and maturin, which builds the wf_core wheel. pytest is the archive's package at the same
+# snapshot; maturin has no Ubuntu package, so cargo builds it with the image's pinned Rust
+# 1.85.1. 1.11.5 is the newest release that accepts that compiler (1.12 needs 1.88, the
+# host's uv-installed 1.15.0 needs 1.89). It is a standalone binary with no Python.
+ARG PYTEST_DEB=9.0.2-4
+ARG MATURIN_VERSION=1.11.5
+RUN apt-get update --snapshot "${UBUNTU_SNAPSHOT}" \
+ && apt-get install -y --no-install-recommends --snapshot "${UBUNTU_SNAPSHOT}" "python3-pytest=${PYTEST_DEB}" \
+ && rm -rf /var/lib/apt/lists/* \
+ && CARGO_HOME=/opt/cargo cargo install --locked --version "${MATURIN_VERSION}" maturin \
+ && rm -rf /opt/cargo/registry /opt/cargo/git \
+ && chmod -R a+rX /opt/cargo

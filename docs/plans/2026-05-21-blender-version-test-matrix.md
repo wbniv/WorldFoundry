@@ -1,5 +1,7 @@
 # Plan: multi-Blender-version test matrix for the level exporter
 
+> **2026‑11‑27: moved off GitHub Actions.** The workflow named below is deleted. The local CI's `blender-addon` step (`scripts/local-ci.sh`) runs the test against the Blender image's Blender when the add-on changes, and `task blender-matrix` (`scripts/blender-matrix.sh`) runs 4.0.2, 4.2.21, 4.5.10 and 5.0.1 on demand, in the Blender image. See [the retirement plan](2026-11-27-retire-github-actions.md).
+
 **Status:** DONE — [`blender-addon-tests.yml`](../../.github/workflows/blender-addon-tests.yml) + [`tests/test_blender_addon_export.py`](../../tests/test_blender_addon_export.py) cover the version matrix.
 
 ## Context
