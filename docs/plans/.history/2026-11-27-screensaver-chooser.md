@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/9146728df) | plan: chooser step 8 deferred; why the coordinator cannot drive Settings on the Pixel |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/a32e41531) | plan: chooser step 8: phone screensaver plays only while charging; no Random row; no uiautomator dump |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/fb84f198a) | plan: screensaver chooser Verification 9 and 10 pass on Cast1 |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/a66b87250) | todo, plan: screensaver chooser built and merged; APK and devices left |
@@ -8,6 +9,11 @@
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+9146728df	author	Will Norris
+9146728df	added	1
+9146728df	deleted	0
+9146728df	files	1
+9146728df	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqP8zNDXFEqEEztS56o
 a32e41531	author	Will Norris
 a32e41531	added	5
 a32e41531	deleted	0

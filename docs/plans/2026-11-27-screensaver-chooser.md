@@ -215,6 +215,18 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
 3. Manifests: `task test-screensaver-preview-metadata` passes with the new cases: Aquarium and Clocks Dreams use `@xml/dream_chooser`, its `settingsActivity` is `org.worldfoundry.screensaver.ScreensaverChooserActivity` (no `/`, no leading `.`), the activity is exported in both manifests; Seahorse Grid and Planted Tank declare no `settingsActivity`; the registry cross-check still passes.
 4. Builds: `task build-clocks-apk` and `task build-aquarium-screensaver-apk` succeed; `aapt2 dump xmltree --file res/xml/dream_chooser.xml <apk>` on each shows the full class name.
 5. Cast1, WF Clocks, through a coordinator check recipe written with the code: start the chooser by component, capture it (focus on the saved row), Down twice, Right, OK (preview starts, `LevelLaunch` logs `cuckoo_village`), Back (focus back on Cuckoo Village), Left, OK (saved). `getCapabilities` through the coordinator then reports `clock` = `cuckoo_village`; `task chromecast:screensaver-select` WF Clocks and `task chromecast:screensaver-trigger`: the Dream's log names Cuckoo Village. Repeat with Random, then Undo, and confirm the provider reports the restored value after each.
+
+    ```
+    $ task chromecast:screensaver:trigger DEVICE=chromecast-test-01 WAIT_MINUTES=14   # J-5d7e0593fe50
+      "active_component": "org.worldfoundry.game.clocks/org.worldfoundry.screensaver.ClocksDreamService",
+      "running_state": "running",   clock "value": "lighthouse"
+      screensaver.png: the Lighthouse clock (red-and-white tower on its rock dial)
+    ```
+
+    **PARTIAL (2026‑11‑27):** the real Dream on Cast1 plays the saved clock (Lighthouse, saved in step 10), and
+    step 9 showed a chooser save reaching Homeboard's Preview. The Dream was already running when the job started,
+    so no `LevelLaunch` line was captured. Not yet run: the key-by-key walk (Right to Preview, Back, Left), Undo,
+    and a Dream started after a chooser save.
 6. Cast1, missing level: save `corolla_gauge`; install a throwaway WF Clocks built from a manifest without it (the `-PwfClocksManifest` route of `task build-clocks-two-entry-apk`); open the chooser: the notice and "Plays now" on Random; trigger the Dream: a clock is drawn; reinstall the shipped APK: Corolla Gauge is saved again with no notice.
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
