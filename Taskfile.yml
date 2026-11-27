@@ -84,6 +84,11 @@ tasks:
     cmds:
       - python3 tests/verify_forth_source.py
 
+  test-level-scripts:
+    desc: "Compile every actor script of every tracked wflevels/**/*.lev on the current engine's zForth dictionary (scripting_zforth.cc Init, math words, mailbox constants), in the linux-test container; fails naming each level whose scripts no longer compile, and when two engine words share a syscall id. A few seconds. Add a generated source with -- --lev PATH. docs/plans/2026-11-27-level-scripts-and-rebuilds.md"
+    cmds:
+      - scripts/in-linux-container.sh python3 tests/check_level_scripts.py {{.CLI_ARGS}}
+
   ensure-build:
     desc: "Build wf_game only when the binary is missing or older than engine sources"
     cmds:
@@ -1687,6 +1692,15 @@ tasks:
       - wflevels/aquarium/aquarium_constants.py
     generates:
       - wflevels/aquarium_idle-standalone.iff
+
+  pilot-demo-level:
+    desc: "PILOT demo level from its golden sources: the Blender step (blender_create_pilot_demo.py imports wflevels/snowgoons-blender/snowgoons-blender.lev and writes pilot_demo.blend and the gitignored pilot_demo.lev + meshes) in the blender container, then build_level_binary.sh → wflevels/pilot_demo{,-standalone}.iff. A fresh clone has no pilot_demo.lev until this runs. LEVCOMP_ARGS=--no-default-settings rebuilds without adding the Level Settings holder"
+    cmds:
+      - WF_CONTAINER_IMAGE=blender WF_CONTAINER_MEMORY=6g scripts/in-linux-container.sh blender --background --python-exit-code 1 --python wflevels/pilot_demo/blender_create_pilot_demo.py
+      - test -s wflevels/pilot_demo/pilot_demo.lev
+      - WF_CONTAINER_ENV="WF_LEVCOMP_ARGS={{.LEVCOMP_ARGS}}" scripts/in-linux-container.sh bash wftools/wf_blender/build_level_binary.sh pilot_demo
+    vars:
+      LEVCOMP_ARGS: '{{.LEVCOMP_ARGS | default ""}}'
 
   aquarium-idle-probe-level:
     desc: "ROTATION_* write probe for the aquarium plan (visible Physics fish, Director-rotated statplat, self-rotating anchored platform) → wflevels/aquarium_idle_probe-standalone.iff"

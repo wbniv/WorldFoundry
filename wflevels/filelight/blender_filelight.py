@@ -99,7 +99,7 @@ COLOR_RING  = (0.55, 0.55, 0.60, 1.0)   # overridden per-segment at runtime
 # while/repeat (tile loop uses begin..until), and `do` runs once at count==0
 # (render-sunburst guards that). Angles are REVOLUTIONS (engine-native Euler).
 DIRECTOR_SCRIPT = (
-    r'\\ wf' '\n'
+    r'\ wf' '\n'
     f': RING1 {RING1_IDX} ;\n'
     f': RING2 {RING2_IDX} ;\n'
     f': RING3 {RING3_IDX} ;\n'

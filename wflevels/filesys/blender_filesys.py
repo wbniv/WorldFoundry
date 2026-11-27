@@ -150,7 +150,7 @@ GRID_Y0   = -35
 #   fsn-navigate ( -- rebuild? )        \ descend/ascend; 1 = Director re-renders
 # Mailbox 10 = one-shot init guard.
 DIRECTOR_SCRIPT = (
-    r'\\ wf' '\n'
+    r'\ wf' '\n'
     f': DIR-T   {DIR_TMPL_IDX} ;\n'
     f': FILE-T  {FILE_TMPL_IDX} ;\n'
     f': CONN-T  {CONN_TMPL_IDX} ;\n'

@@ -26,6 +26,9 @@
 # wrapper includes "../<level>.iff", so it must be the source directory's parent.
 # WF_TEXTILE_OUT_DIR optionally isolates atlas output when source models are
 # shared with another level; generated IFF includes point into that directory.
+# WF_LEVCOMP_ARGS optionally passes extra levcomp flags (space-separated), e.g.
+# --no-default-settings to rebuild a level without levcomp's default Level Settings
+# holder (a repair that must not also add the global settings).
 
 set -euo pipefail
 
@@ -76,6 +79,8 @@ LEVCOMP_ARGS=("$LEVEL.lev.bin" "$OBJECTS_LC" "$LEVEL.lvl" "$OAD_DIR"
   --iff-txt "$LEVEL.iff.txt"
   --textile-ini "$LEVEL.ini")
 [[ -n "$MESH_REF_PREFIX" ]] && LEVCOMP_ARGS+=(--mesh-ref-prefix "$MESH_REF_PREFIX")
+# shellcheck disable=SC2206
+[[ -n "${WF_LEVCOMP_ARGS:-}" ]] && LEVCOMP_ARGS+=(${WF_LEVCOMP_ARGS})
 "$LEVCOMP" "${LEVCOMP_ARGS[@]}"
 
 echo "[3/5] textile-rs  -ini=$LEVEL.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}"

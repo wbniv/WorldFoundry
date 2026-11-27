@@ -92,7 +92,7 @@ COLOR_BAND  = (0.55, 0.55, 0.60, 1.0)   # overridden per-segment at runtime by h
 
 # ── Director Forth script — RENDER POLICY (hot-reloadable). Reuses fl-scan. ──────
 DIRECTOR_SCRIPT = (
-    r'\\ wf' '\n'
+    r'\ wf' '\n'
     f': BAND1 {BAND1_IDX} ;\n'
     f': BAND2 {BAND2_IDX} ;\n'
     f': BAND3 {BAND3_IDX} ;\n'

@@ -71,7 +71,7 @@ COLOR_BOX   = (0.55, 0.55, 0.60, 1.0)   # overridden per-cell at runtime by type
 # C emits the flat cell table (tm-scan + tm-*). This script decides the LOOK:
 # the file-type colour palette and the slab height. No navigate, no fly-down.
 DIRECTOR_SCRIPT = (
-    r'\\ wf' '\n'
+    r'\ wf' '\n'
     f': BOX-T {BOX_IDX} ;\n'
     f': MAXDEPTH {MAX_DEPTH} ;\n'
     f': MAXNODES {MAX_NODES} ;\n'
