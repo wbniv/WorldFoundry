@@ -1,0 +1,18 @@
+# Committed: style_geom_anime.lev, style_geom_anime-standalone.iff.txt and the relative symlinks that
+# scripts/build-style-geometry-scene.py makes (scripts/level_asset_links.py): mesh .iff, source
+# textures and textile.flags, so `task build-level -- style_geom_anime` builds from a clean clone.
+# Ignored: what build_level_binary.sh writes here.
+*.lev.bin
+*.lvl
+*.ini
+asset.inc
+style_geom_anime.iff.txt
+Perm.tga
+Perm.ruv
+Perm.cyc
+Room[0-9]*.tga
+Room[0-9]*.ruv
+Room[0-9]*.cyc
+pal[0-9]*.tga
+palPerm.tga
+textile.log.htm
