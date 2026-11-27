@@ -228,6 +228,26 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
     so no `LevelLaunch` line was captured. Not yet run: the key-by-key walk (Right to Preview, Back, Left), Undo,
     and a Dream started after a chooser save.
 6. Cast1, missing level: save `corolla_gauge`; install a throwaway WF Clocks built from a manifest without it (the `-PwfClocksManifest` route of `task build-clocks-two-entry-apk`); open the chooser: the notice and "Plays now" on Random; trigger the Dream: a clock is drawn; reinstall the shipped APK: Corolla Gauge is saved again with no notice.
+
+    ```
+    $ task chromecast:screensaver:setting DEVICE=chromecast-test-01 SETTING_ID=clock VALUE=corolla_gauge   # J-27a2a1338835
+    $ task chromecast:submit DEVICE=chromecast-test-01 APP=clocks WORKFLOW=install \
+        APK=~/tmp/wf-apk-frozen/screensaver-clocks-no-corolla-step6-a78eb982e.apk          # sha256 1deee44b…, J-6283b691a786
+      cancelled: APK installed; launcher unverified
+    $ task chromecast:check … RECIPE=dev/device/chooser-cast1-saved-mark.json            # J-0b4d1ac89ceb (Homeboard › Open WF Clocks settings)
+      02 "The saved choice (corolla_gauge) is no longer in this app. The screensaver picks one at random until you choose."
+         "2 choices": Minute Machine, Minute Machine B; no row marked
+    $ task chromecast:screensaver:show DEVICE=chromecast-test-01                          # J-61e9ccf33638
+      observed_component …/ScreensaverPreviewActivity; screensaver.png: Minute Machine drawn
+    $ task chromecast:submit … APK=~/tmp/wf-apk-frozen/screensaver-clocks-release-a66b87250.apk
+      J-6c098b4d9d30, J-8bd7c71847af, J-92d863260c10: failed: install-over-foreground
+    ```
+
+    **PARTIAL (2026‑11‑27):** the notice and the unmarked list (D4: no Random row) **PASS**; a clock is drawn
+    **PASS**, through the preview screen that `screensaver-show` uses rather than the Dream. The notice names the
+    level by its id because the label left with the roster. **Open:** reinstalling the shipped APK is refused three
+    times with `install-over-foreground` (WF Clocks stays in front after HOME and BACK presses), so "Corolla Gauge
+    saved again with no notice" is unverified, and **Cast1 still has the throwaway build installed.**
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
 
