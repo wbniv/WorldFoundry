@@ -32,6 +32,8 @@ public final class ClocksSettingsProvider extends ContentProvider {
             throw new SecurityException("WF Clocks settings require the device shell");
         }
         Bundle result = new Bundle();
+        // The shared level calls the screensaver chooser uses (getLevel, setSetting level:<id>).
+        if (LevelChoiceCalls.handle(getContext(), method, arg, result)) return result;
         String clockPrefix = CLOCK + ":";
         String orientationPrefix = TankSettingsProvider.ORIENTATION + ":";
         if ("getCapabilities".equals(method)) {
@@ -58,9 +60,7 @@ public final class ClocksSettingsProvider extends ContentProvider {
             TankSettingsProvider.putOrientation(getContext(), result, arg.substring(orientationPrefix.length()));
         } else if ("setSetting".equals(method) && arg != null && arg.startsWith(clockPrefix)) {
             String id = arg.substring(clockPrefix.length());
-            if (!TankChoice.valid(getContext(), id)) throw new IllegalArgumentException("Unknown clock: " + id);
-            result.putBoolean("saved", TankChoice.set(getContext(), id));
-            result.putString(CLOCK, TankChoice.get(getContext()));
+            LevelChoiceCalls.save(getContext(), id, result, CLOCK, "Unknown clock: " + id);
         } else if ("setSetting".equals(method)) {
             throw new IllegalArgumentException("Unknown setting");
         } else {

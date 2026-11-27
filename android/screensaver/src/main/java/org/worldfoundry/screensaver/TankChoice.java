@@ -38,6 +38,15 @@ final class TankChoice {
         return valid(context, id) ? id : RANDOM;
     }
 
+    /**
+     * The raw saved value, or null when nothing was ever saved: unlike {@link #get}, an id the roster
+     * no longer holds is returned as it is, so the chooser can say the saved level is missing.
+     */
+    static String stored(Context context) {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null);
+    }
+
+    /** Only LevelChoiceCalls calls this (LaunchModeTest's source guard). */
     static boolean set(Context context, String id) {
         if (!valid(context, id)) return false;
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

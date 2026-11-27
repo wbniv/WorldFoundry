@@ -29,6 +29,8 @@ public final class TankSettingsProvider extends ContentProvider {
             throw new SecurityException("Screensaver settings require the device shell");
         }
         Bundle result = new Bundle();
+        // The shared level calls the screensaver chooser uses (getLevel, setSetting level:<id>).
+        if (LevelChoiceCalls.handle(getContext(), method, arg, result)) return result;
         if ("getCapabilities".equals(method)) {
             JSONArray options = new JSONArray();
             try {
@@ -64,11 +66,8 @@ public final class TankSettingsProvider extends ContentProvider {
         } else if ("setSetting".equals(method) && arg != null && arg.startsWith(ORIENTATION + ":")) {
             putOrientation(getContext(), result, arg.substring(ORIENTATION.length() + 1));
         } else if ("setSetting".equals(method)) {
-            if (arg == null || !arg.startsWith("tank:") || !TankChoice.valid(getContext(), arg.substring(5))) {
-                throw new IllegalArgumentException("Unknown tank");
-            }
-            result.putBoolean("saved", TankChoice.set(getContext(), arg.substring(5)));
-            result.putString("tank", TankChoice.get(getContext()));
+            if (arg == null || !arg.startsWith("tank:")) throw new IllegalArgumentException("Unknown tank");
+            LevelChoiceCalls.save(getContext(), arg.substring(5), result, "tank", "Unknown tank");
         } else {
             throw new IllegalArgumentException("Unknown settings method");
         }

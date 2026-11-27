@@ -102,18 +102,27 @@ public final class LaunchModeTest {
                 check(read(java.resolve(pack + ".java")).contains("public final class " + pack + " extends LauncherActivity"),
                         pack + " extends the shared LauncherActivity");
             }
-            // The menu changes nothing that is saved: TankChoice.set has one caller, the settings provider.
+            // The menu changes nothing that is saved: TankChoice.set has one caller, LevelChoiceCalls, and
+            // only the settings providers call that (the Aquarium's tank, the Clocks' clock, and the shared
+            // level id the screensaver chooser uses through its pack's provider:
+            // docs/plans/2026-11-27-screensaver-chooser.md).
             List<String> writers = new ArrayList<>();
+            List<String> callers = new ArrayList<>();
             try (Stream<Path> files = Files.list(java)) {
                 for (Path p : (Iterable<Path>) files::iterator) {
                     String name = p.getFileName().toString();
-                    if (name.endsWith(".java") && read(p).contains("TankChoice.set(")) writers.add(name);
+                    if (!name.endsWith(".java")) continue;
+                    String text = read(p);
+                    if (text.contains("TankChoice.set(")) writers.add(name);
+                    if (text.contains("LevelChoiceCalls.save(") || text.contains("LevelChoiceCalls.handle(")) callers.add(name);
                 }
             }
-            // Only a pack's settings provider writes its saved choice: the Aquarium's tank, the Clocks' clock.
             writers.sort(null);
-            check(writers.equals(Arrays.asList("ClocksSettingsProvider.java", "TankSettingsProvider.java")),
-                    "only the settings providers write the saved choice, found " + writers);
+            callers.sort(null);
+            check(writers.equals(Arrays.asList("LevelChoiceCalls.java")),
+                    "only LevelChoiceCalls writes the saved choice, found " + writers);
+            check(callers.equals(Arrays.asList("ClocksSettingsProvider.java", "TankSettingsProvider.java")),
+                    "only the settings providers call LevelChoiceCalls, found " + callers);
             check(!activity.contains("getSharedPreferences") && !activity.contains("TankChoice.set"),
                     "LauncherActivity writes no preference");
         }
