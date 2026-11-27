@@ -138,7 +138,7 @@ GPU skinning ([plan](2026-10-16-gpu-skinning-chromecast-experiment.md)) would ma
 - **Light from the flames.** There is no light control in the engine (Will's earlier direction), so the glow on the pine is not a thing.
 - **Sparks, smoke, a wind that moves the whole tree.** Not at this size.
 - **The date range and other December events.** They have their own TODO items.
-- **A level-of-detail replacement of the flames.** [The flowers LOD plan](2026-11-22-cuckoo-village-flowers-lod.md) covers geometry that is replaced by distance; if it lands, the flames join it.
+- **Level of detail for the flames: by behaviour, not geometry** (corrected 2026‑11‑27 after Will asked what a flame LOD would look like). A flame is about 70 triangles and a few pixels from the village camera, so a coarser mesh saves nothing; [the flowers LOD plan](2026-11-22-cuckoo-village-flowers-lod.md) does not apply. The measured cost of B is the director (+1.76 ms) and the deformer (+0.44 ms), so the useful option is distance-based behaviour: the full B deform near, A's swapped shapes at middle distance, a static or round-robin flame far. Moving B's per-frame rule from Forth into the engine would cut the director cost at any distance.
 
 ## Judging them by eye
 

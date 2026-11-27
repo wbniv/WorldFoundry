@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/41508fa0a) | Candle flicker: Option B measured against A on cast1 (+1.39 ms CPU a frame), the look material, the study camera resolved |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/34c6f5ce0) | Cuckoo Village: size gate re-set to 9 MiB (Will), enforced by a test |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/6af3636d5) | Cuckoo Village: the candle flames flicker (Option A: four meshes a tree, two shapes a group, 24 two-sine rules) |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/021bb3c4f) | Candle flicker plan: judge the variants by eye (tree clips, a near study, a frame strip) as well as by profile |
@@ -9,6 +10,11 @@
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/a35980cc5) | Plan: flickering candle flames (four meshes a tree, a clock-driven shape swap), with mockups and diagrams |
 
 <!--history-meta v1
+41508fa0a	author	Will Norris
+41508fa0a	added	27
+41508fa0a	deleted	1
+41508fa0a	files	1
+41508fa0a	body	variant-benchmark J-83080304e587 (A then B, 60 s after 15 s, --frame-profile through the Dream host): CPU total 22.19 ms (A)\nagainst 23.58 ms (B), the director +1.76 ms and the deformer +0.44 ms; both 30 fps. The gate (B within 0.1 ms of A) fails;\nA stays shipped and the choice is Will's (TODO, T5). Near-study strip and loops (desktop, same instants), cast1 tree clips\n(J-cb9ea5a3f79a, J-26738f3d4732) and a comparison page in the plan bundle. The camera pointed where told all along: the\ncapture's warm-up was one frame (NaN start), the director's own camera writes run after the camera update, and the aimed\ncandle sits inside the foliage. Evidence, analysis script and the measurement-build patch in\ndocs/diagnostics/candle-flicker-ab-cast1-2026-11-27/. New TODO: the Player falls out of the room in a desktop Debug run.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 34c6f5ce0	author	Will Norris
 34c6f5ce0	added	1
 34c6f5ce0	deleted	1
