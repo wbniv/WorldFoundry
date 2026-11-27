@@ -1,0 +1,494 @@
+#!/usr/bin/env python3
+"""Write the screensaver chooser mockups (docs/plans/2026-11-27-screensaver-chooser.md).
+
+Every page is self-contained (inline CSS and JS, no external or relative references), drawn on a
+1440x900 canvas with a <main> root, and every button explains itself through an onclick that
+updates the feedback line. The TV screen is drawn at Android's 960x540 dp (both Chromecasts:
+1080p at 2.0x and 4K at 4.0x density resolve to it) and scaled; the phone at 412x892 dp.
+
+Run: python3 make_mockups.py   (writes the .html files beside this script)
+Then capture the PNGs with Homeboard's dev/plan-mockup-check.cjs (see the plan's Mockups section).
+"""
+import json
+import pathlib
+
+HERE = pathlib.Path(__file__).resolve().parent
+
+CSS = r"""
+*{box-sizing:border-box}
+html,body{margin:0;background:#0d1521;color:#eef2fa;font:18px/1.4 system-ui,"Noto Sans","Noto Sans Thai","Loma",sans-serif}
+main{width:1440px;height:900px;padding:22px 32px;overflow:hidden;position:relative}
+.kicker{color:#9ad7ff;font-size:14px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+h1{font-size:28px;line-height:1.2;margin:0 0 14px}
+.page{display:flex;gap:24px;align-items:flex-start}
+.devices{display:flex;flex-direction:column;gap:12px}
+.devrow{display:flex;gap:24px;align-items:flex-start}
+.notes{flex:1;min-width:0;font-size:16px;line-height:1.4;color:#c9d5e6}
+.notes h2{font-size:17px;margin:0 0 6px;color:#eef2fa}
+.notes ul{margin:0 0 12px;padding-left:18px}
+.notes li{margin:0 0 6px}
+.cap{font-size:14px;color:#9aa7b8;margin:4px 0 0}
+.remote{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.remote span{font-size:14px;color:#9aa7b8;margin-right:4px}
+button{font:inherit;font-size:16px;color:#eef2fa;background:#2c4160;border:1px solid #6f86a6;border-radius:8px;padding:5px 14px;cursor:pointer;white-space:nowrap}
+footer{position:absolute;left:32px;right:32px;bottom:14px;font-size:16px;line-height:1.35;color:#d7e3f4;background:#16233a;border-left:4px solid #9ad7ff;border-radius:0 8px 8px 0;padding:8px 12px;min-height:44px}
+/* ---- device frames ---- */
+.bezel{background:#05080c;border:2px solid #3a4658;border-radius:10px;padding:8px;position:relative}
+.wrap{position:relative;overflow:hidden}
+.tv,.ph{position:absolute;left:0;top:0;transform-origin:0 0;background:#0f1419;color:#e8edf3;overflow:hidden}
+.tv{width:960px;height:540px;padding:27px 48px;display:grid;grid-template-columns:292px 1fr;gap:36px}
+.ph{width:412px;height:892px;display:flex;flex-direction:column}
+.badge{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#c79a3b,#6b4a12);display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff3d6}
+.badge.aq{background:linear-gradient(135deg,#3aa0c7,#0f4a6b)}
+.appname{font-size:15px;color:#9aa7b8;margin:14px 0 2px}
+.tv h2{font-size:30px;line-height:1.15;margin:0 0 10px;font-weight:600}
+.explain{font-size:16px;line-height:1.4;color:#c4cfdc;margin:0}
+.left{display:flex;flex-direction:column;min-width:0}
+.hints{margin-top:auto;font-size:14px;color:#9aa7b8;line-height:1.7}
+.hints b{display:inline-block;min-width:34px;text-align:center;border:1px solid #4a5668;border-radius:5px;padding:0 4px;margin-right:6px;color:#dbe4ef;font-weight:600}
+.right{display:flex;flex-direction:column;min-width:0}
+.count{font-size:14px;color:#9aa7b8;margin:4px 0 6px}
+.more{font-size:13px;color:#7f8c9e;height:18px;line-height:18px;padding-left:44px}
+.row{display:flex;align-items:center;gap:12px;min-height:58px;padding:7px 12px;border-radius:10px;margin:2px 0;cursor:pointer}
+.row .radio{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #9aa7b8;position:relative}
+.row.saved .radio{border-color:#8ab4f8}
+.row.saved .radio:after{content:"";position:absolute;left:3px;top:3px;width:10px;height:10px;border-radius:50%;background:#8ab4f8}
+.row .txt{flex:1;min-width:0;overflow-wrap:anywhere}
+.row .name{font-size:19px;line-height:1.25;display:block}
+.row .sub{font-size:14px;line-height:1.3;color:#9aa7b8;display:block}
+.row .acts{flex:none;display:flex;gap:8px;align-items:center}
+.chip{font-size:13px;line-height:1.3;padding:2px 9px;border-radius:12px;background:#1d3a2b;color:#a8e6b8;border:1px solid #3f7a56;white-space:nowrap}
+.chip.now{background:#3a2f12;color:#ffe3a6;border-color:#b98d2f}
+.row button{font-size:15px;padding:4px 12px;background:transparent;color:#c9d6e6;border:1px solid #56657a;border-radius:16px}
+.row.focus.p-row{background:#e8eef6;color:#10161d}
+.row.focus.p-row .sub{color:#3d4a5c}
+.row.focus.p-row .radio{border-color:#3d4a5c}
+.row.focus.p-row.saved .radio{border-color:#1a5fd0}
+.row.focus.p-row.saved .radio:after{background:#1a5fd0}
+.row.focus.p-row button{color:#10161d;border-color:#7a8799}
+.row.focus.p-row .chip{background:#d4f0dc;color:#174a2a;border-color:#6fae84}
+.row.focus:not(.p-row){background:#1d2733;outline:2px solid #56657a}
+.row button.f{background:#e8eef6;color:#10161d;border-color:#e8eef6;font-weight:600}
+.status{margin-top:auto;font-size:15px;line-height:1.35;color:#c4cfdc;min-height:42px;border-top:1px solid #263241;padding-top:8px}
+.notice{border-left:4px solid #e0b24a;background:#2a2414;border-radius:0 8px 8px 0;padding:8px 12px;font-size:15px;line-height:1.35;color:#f3e3bd;margin-bottom:4px}
+.err{margin:auto 0;display:flex;flex-direction:column;gap:12px}
+.err h3{font-size:22px;margin:0}
+.err p{margin:0;font-size:16px;color:#c4cfdc}
+.err .btns{display:flex;gap:12px}
+.err button{font-size:17px;background:#1d2733;border-color:#56657a}
+.err button.f{background:#e8eef6;color:#10161d;border-color:#e8eef6}
+.ov{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;padding:28px 48px;background:radial-gradient(ellipse at 60% 40%,#3b5a7a,#0b1420 70%);color:#fff;font-size:18px;line-height:1.4}
+.ov.closed{background:#1a2230;align-items:center;justify-content:center;text-align:center}
+.ov p{margin:0;background:rgba(0,0,0,.45);padding:10px 14px;border-radius:8px}
+/* big font (2.0x): one column, compact header, actions under the name */
+.tv.fs2{grid-template-columns:1fr;gap:6px;padding:20px 40px}
+.tv.fs2 .left{flex-direction:row;align-items:center;gap:14px}
+.tv.fs2 .badge,.tv.fs2 .appname,.tv.fs2 .hints,.tv.fs2 .explain{display:none}
+.tv.fs2 h2{font-size:44px;margin:0}
+.tv.fs2 .count{font-size:24px;margin:0}
+.tv.fs2 .more{font-size:22px;height:28px;line-height:28px}
+.tv.fs2 .row{flex-wrap:wrap;min-height:0}
+.tv.fs2 .row .name{font-size:36px}
+.tv.fs2 .row .sub{font-size:26px}
+.tv.fs2 .row .acts{width:100%;padding-left:32px}
+.tv.fs2 .chip{font-size:24px}
+.tv.fs2 .row .radio{width:32px;height:32px;border-width:3px}
+.tv.fs2 .row.saved .radio:after{left:5px;top:5px;width:16px;height:16px}
+.tv.fs2 .row button{font-size:26px}
+.tv.fs2 .status{font-size:26px;min-height:0}
+/* phone */
+.sb{height:28px;font-size:13px;color:#c4cfdc;display:flex;justify-content:space-between;padding:6px 18px 0}
+.ab{display:flex;align-items:center;gap:10px;padding:8px 8px 4px}
+.ab button{background:transparent;border:none;font-size:24px;padding:4px 10px;color:#e8edf3}
+.ab .t{font-size:22px;font-weight:600;line-height:1.15}
+.ab .s{font-size:13px;color:#9aa7b8}
+.ph .explain{padding:0 20px 8px;font-size:15px}
+.ph .list{padding:0 8px;display:flex;flex-direction:column}
+.ph .row{min-height:60px;margin:0;border-radius:0;border-bottom:1px solid #1e2834}
+.ph .row .name{font-size:17px}
+.ph .row button{padding:4px 10px;font-size:14px}
+.ph .status{margin:auto 12px 0;padding:10px 8px 18px}
+.ph .more{padding-left:52px}
+.set .item{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid #1e2834;font-size:17px}
+.set .item .radio{width:20px;height:20px;border-radius:50%;border:2px solid #9aa7b8;flex:none;position:relative}
+.set .item.on .radio{border-color:#8ab4f8}
+.set .item.on .radio:after{content:"";position:absolute;left:3px;top:3px;width:10px;height:10px;border-radius:50%;background:#8ab4f8}
+.set .item span.n{flex:1}
+.set .item button{background:transparent;border:1px solid #56657a;border-radius:18px;font-size:18px;padding:2px 10px;color:#c9d6e6}
+.set .hdr{font-size:13px;color:#8ab4f8;padding:14px 20px 4px}
+.set .foot{padding:16px 20px;display:flex;gap:10px}
+"""
+
+LEVELS = {
+    "clocks": [
+        ["minute_machine", "Minute Machine"], ["tide_harbour", "Tide Harbour"], ["train_loops", "Train Loops"],
+        ["bamboo_tipper_pond", "Bamboo Tipper and Pond"], ["triple_axis_tourbillon", "Triple-axis Tourbillon"],
+        ["cuckoo_village", "Cuckoo Village"], ["moon_lantern", "Moon Lantern"], ["metronome_forest", "Metronome Forest"],
+        ["lighthouse", "Lighthouse"], ["anamorphic_shards", "Anamorphic Shards"], ["hour_tree", "Hour Tree"],
+        ["corolla_gauge", "The Corolla Gauge"], ["dutch_cuckoo_village", "Dutch Cuckoo Village"],
+        ["mirror_haze", "Mirror and Haze"], ["globe_sun_ring", "Globe in a 24-hour Sun Ring"], ["lava_lamp", "Lava lamp"],
+    ],
+    "aquarium": [
+        ["aquarium", "Clownfish"], ["aquarium_blue_shrimp", "Blue Shrimp"], ["aquarium_betta", "Betta"],
+        ["aquarium_jellyfish", "Jellyfish"], ["aquarium_lionfish", "Lionfish"], ["aquarium_plants", "Planted Urchin"],
+        ["aquarium_arowana", "Arowana"], ["aquarium_tiger_barbs", "Tiger Barbs"], ["aquarium_thai_reef", "Thai Reef"],
+        ["aquarium_thai_reef_anime", "Thai Reef Anime"], ["aquarium_sea_stars", "Sea Stars"], ["aquarium_discus", "Discus"],
+    ],
+}
+LEVELS["clocks_long"] = LEVELS["clocks"] + [["sixty_char_test", "A sixty-character test name that shows how a long row wraps."]]
+
+JS = r"""
+const STR = {
+ en: {
+  app: {clocks: 'WF Clocks', clocks_long: 'WF Clocks', aquarium: 'WF Aquarium'},
+  noun: {clocks: 'clock', clocks_long: 'clock', aquarium: 'tank'},
+  title: 'Screensaver',
+  explain: n => 'Choose the ' + n + ' the screensaver shows. A change applies from its next start.',
+  random: 'Random', randomSub: n => 'A different ' + n + ' each time the screensaver starts',
+  saved: 'Saved', now: 'Plays now', preview: 'Preview', undo: 'Undo',
+  hChoose: 'Choose', hUse: 'Use for screensaver', hPrev: 'Preview', hBack: 'Done',
+  count: k => k + ' choices', more: k => k + ' more',
+  status: x => 'Saved. The screensaver shows ' + x + ' from its next start.',
+  was: x => ' Before: ' + x + '.',
+  undone: x => 'Undone. The screensaver shows ' + x + ' again.',
+  missing: (id, n) => 'The saved ' + n + ' (' + id + ') is no longer in this app. The screensaver plays Random until you choose.',
+  errT: 'Could not read the screensaver settings', errP: 'Nothing was changed. Try again, or press Back to leave.',
+  retry: 'Try again', close: 'Close'
+ },
+ th: {
+  app: {clocks: 'WF Clocks', clocks_long: 'WF Clocks', aquarium: 'WF Aquarium'},
+  noun: {clocks: 'นาฬิกา', clocks_long: 'นาฬิกา', aquarium: 'ตู้ปลา'},
+  title: 'ภาพพักหน้าจอ',
+  explain: n => 'เลือก' + n + 'ที่จะแสดงเป็นภาพพักหน้าจอ การเปลี่ยนแปลงมีผลเมื่อเริ่มครั้งถัดไป',
+  random: 'สุ่ม', randomSub: n => n + 'ไม่ซ้ำกันทุกครั้งที่ภาพพักหน้าจอเริ่ม',
+  saved: 'บันทึกแล้ว', now: 'กำลังใช้', preview: 'ดูตัวอย่าง', undo: 'เลิกทำ',
+  hChoose: 'เลือก', hUse: 'ใช้เป็นภาพพักหน้าจอ', hPrev: 'ดูตัวอย่าง', hBack: 'เสร็จ',
+  count: k => k + ' ตัวเลือก', more: k => 'อีก ' + k + ' รายการ',
+  status: x => 'บันทึกแล้ว ภาพพักหน้าจอจะแสดง ' + x + ' ตั้งแต่ครั้งถัดไป',
+  was: x => ' ก่อนหน้า: ' + x,
+  undone: x => 'เลิกทำแล้ว ภาพพักหน้าจอจะแสดง ' + x + ' เหมือนเดิม',
+  missing: (id, n) => n + 'ที่บันทึกไว้ (' + id + ') ไม่มีในแอปนี้แล้ว ภาพพักหน้าจอจะสุ่มจนกว่าคุณจะเลือก',
+  errT: 'อ่านการตั้งค่าภาพพักหน้าจอไม่ได้', errP: 'ไม่มีอะไรเปลี่ยนแปลง ลองอีกครั้ง หรือกดย้อนกลับเพื่อออก',
+  retry: 'ลองอีกครั้ง', close: 'ปิด'
+ }
+};
+const feedback = document.getElementById('feedback');
+function fb(t) { feedback.textContent = t; }
+function h(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+let active = null;
+const screens = [];
+class Screen {
+ constructor(host, cfg) { this.host = host; this.cfg = cfg; host.onclick = () => { active = this; }; this.reset(); }
+ reset() {
+  const c = this.cfg;
+  Object.assign(this, {pack: c.pack, lang: c.lang || 'en', kind: c.kind || 'tv', stored: c.stored, prev: c.prev || null,
+   undoRow: c.undoRow || null, status: c.status || null, focus: c.focus, part: c.part || 'row', overlay: c.overlay || null,
+   error: !!c.error, cap: c.cap || 6, fs2: !!c.fs2});
+  this.render();
+ }
+ get T() { return STR[this.lang]; }
+ get levels() { return LEVELS[this.pack]; }
+ get noun() { return this.T.noun[this.pack]; }
+ get key() { return this.pack === 'aquarium' ? 'tank' : 'clock'; }
+ valid(id) { return id === 'random' || this.levels.some(l => l[0] === id); }
+ get saved() { return this.valid(this.stored) ? this.stored : 'random'; }
+ get missing() { return !this.valid(this.stored); }
+ name(id) { if (id === 'random') return this.T.random; const l = this.levels.find(l => l[0] === id); return l ? l[1] : id; }
+ rows() { const r = this.levels.length > 1 ? [['random', this.T.random]] : []; return r.concat(this.levels); }
+ idx(id) { return this.rows().findIndex(r => r[0] === id); }
+ press(k) {
+  const rows = this.rows(), i = this.idx(this.focus), n = this.name(this.focus);
+  if (this.overlay === 'preview') {
+   if (k === 'back') { this.overlay = null; this.part = 'row'; fb('The preview ends (its :preview process exits, as today) and the chooser reads the saved choice again from the provider. Focus returns to ' + n + '.'); }
+   else fb('The preview is a live level, full screen. Any key but Back is ignored by this mockup; on the TV the preview activity behaves as it does from Homeboard today. Back returns.');
+   return this.render();
+  }
+  if (this.overlay === 'closed') { this.overlay = null; fb('Opened again: the chooser reads the provider and focuses the saved row.'); this.focus = this.saved; this.part = 'row'; this.undoRow = null; this.prev = null; this.status = null; return this.render(); }
+  if (this.error) {
+   if (k === 'left' || k === 'right') { this.part = this.part === 'retry' ? 'close' : 'retry'; fb('Focus moves between Try again and Close.'); }
+   else if (k === 'ok' && this.part !== 'close') { this.error = false; this.focus = this.saved; this.part = 'row'; fb('Try again: the provider answered this time, so the list appears with the saved row focused.'); }
+   else if (k === 'ok' || k === 'back') { this.overlay = 'closed'; fb('Close and Back leave the chooser. Nothing was read or written.'); }
+   return this.render();
+  }
+  if (k === 'up' || k === 'down') {
+   const j = Math.max(0, Math.min(rows.length - 1, i + (k === 'up' ? -1 : 1)));
+   this.focus = rows[j][0]; this.part = 'row';
+   fb(j === i ? 'Already at the ' + (k === 'up' ? 'top' : 'bottom') + ' of the list.' : 'Focus moves to ' + this.name(this.focus) + '. Nothing is saved until OK.');
+  } else if (k === 'right') {
+   if (this.part === 'row') { this.part = 'preview'; fb('Focus on Preview for ' + n + '. OK plays it full screen through ScreensaverPreviewActivity with LEVEL=' + this.focus + '; nothing is saved.'); }
+   else if (this.part === 'preview' && this.undoRow === this.focus) { this.part = 'undo'; fb('Focus on Undo: OK saves ' + this.name(this.prev) + ' again.'); }
+   else fb('Nothing further to the right.');
+  } else if (k === 'left') {
+   if (this.part === 'undo') this.part = 'preview'; else this.part = 'row';
+   fb('Focus moves back toward the row.');
+  } else if (k === 'ok') {
+   if (this.part === 'preview') { this.overlay = 'preview'; fb('Preview of ' + n + ': ScreensaverPreviewActivity, LEVEL=' + this.focus + ', one run, nothing saved. Back ends it.'); }
+   else if (this.part === 'undo') { const p = this.prev; this.stored = p; this.status = this.T.undone(this.name(p)); this.undoRow = null; this.prev = null; this.part = 'row'; fb('Undone: setSetting ' + this.key + ':' + p + ' through the provider. ' + this.name(p) + ' is saved again; Undo goes away.'); }
+   else if (this.focus === this.saved && !this.missing) { fb(n + ' is already saved. Nothing changes.'); }
+   else { this.prev = this.missing ? null : this.saved; this.stored = this.focus; this.undoRow = this.prev ? this.focus : null; this.status = this.T.status(n) + (this.prev ? this.T.was(this.name(this.prev)) : ''); fb('Saved: setSetting ' + this.key + ':' + this.focus + ' through the app\'s own settings provider, the same call the coordinator makes. The next Dream plays it.' + (this.prev ? ' Undo sits on this row until you leave.' : ' No Undo: the value before was a level this app no longer has.')); }
+  } else if (k === 'back') {
+   if (this.part !== 'row') { this.part = 'row'; fb('Back from a button returns focus to its row.'); }
+   else { this.overlay = 'closed'; fb('Back closes the chooser and returns to the caller (Homeboard, or Android\'s Settings). The saved choice stays ' + this.name(this.saved) + '. Press any key to open it again.'); }
+  }
+  this.render();
+ }
+ tap(id, what) {
+  active = this;
+  if (this.overlay) return this.press('back');
+  this.focus = id; this.part = what;
+  this.press('ok');
+ }
+ rowEl(id, label, tv) {
+  const T = this.T, saved = id === this.saved, focus = id === this.focus;
+  const r = h('div', 'row' + (saved ? ' saved' : '') + (focus && tv ? ' focus p-' + this.part : ''));
+  r.setAttribute('role', 'radio'); r.setAttribute('aria-checked', saved ? 'true' : 'false');
+  r.appendChild(h('span', 'radio'));
+  const t = h('span', 'txt'); t.appendChild(h('span', 'name', label));
+  if (id === 'random') t.appendChild(h('span', 'sub', T.randomSub(this.noun)));
+  r.appendChild(t);
+  const a = h('span', 'acts');
+  if (saved) a.appendChild(h('span', 'chip' + (this.missing ? ' now' : ''), this.missing ? T.now : T.saved));
+  if (!tv || focus) {
+   const p = h('button', focus && tv && this.part === 'preview' ? 'f' : '', tv ? T.preview : '▶ ' + T.preview);
+   p.setAttribute('aria-label', T.preview + ' ' + label);
+   p.onclick = e => { e.stopPropagation(); this.tap(id, 'preview'); };
+   a.appendChild(p);
+  }
+  if (this.undoRow === id) {
+   const u = h('button', focus && tv && this.part === 'undo' ? 'f' : '', T.undo);
+   u.onclick = e => { e.stopPropagation(); this.tap(id, 'undo'); };
+   a.appendChild(u);
+  }
+  r.appendChild(a);
+  r.onclick = () => this.tap(id, 'row');
+  return r;
+ }
+ windowed(list) {
+  const rows = this.rows(), i = Math.max(0, this.idx(this.focus)), cap = this.capNow;
+  const start = this.kind === 'phone' && this.cfg.top ? 0 : Math.max(0, Math.min(rows.length - cap, i - Math.floor(cap / 2)));
+  list.appendChild(h('div', 'more', start > 0 ? '▲ ' + this.T.more(start) : ''));
+  rows.slice(start, start + cap).forEach(r => list.appendChild(this.rowEl(r[0], r[1], this.kind === 'tv')));
+  const after = rows.length - start - cap;
+  list.appendChild(h('div', 'more', after > 0 ? '▼ ' + this.T.more(after) : ''));
+ }
+ overlayEl() {
+  const T = this.T, o = h('div', 'ov' + (this.overlay === 'closed' ? ' closed' : ''));
+  const p = h('p');
+  p.textContent = this.overlay === 'preview'
+   ? (this.focus === 'random' ? 'Preview: one ' + this.noun + ' drawn at random' : 'Preview: ' + this.name(this.focus)) + ' · the live level, full screen · nothing is saved · Back returns here'
+   : (this.kind === 'phone' ? 'Back in Android\'s Settings › Screen saver. ' : 'Back in Homeboard, Open ' + T.app[this.pack] + ' settings focused. ') + 'Saved: ' + this.name(this.saved) + '. Any key or tap opens the chooser again.';
+  o.appendChild(p);
+  return o;
+ }
+ render(capTry) {
+  this.capNow = capTry || this.cap;
+  const T = this.T, tv = this.kind === 'tv';
+  const s = h('div', tv ? 'tv' + (this.fs2 ? ' fs2' : '') : 'ph');
+  s.style.transform = 'scale(' + this.cfg.scale + ')';
+  s.setAttribute('lang', this.lang);
+  if (tv) {
+   const L = h('div', 'left');
+   L.appendChild(h('div', 'badge' + (this.pack === 'aquarium' ? ' aq' : ''), this.pack === 'aquarium' ? '◉' : '◷'));
+   L.appendChild(h('div', 'appname', T.app[this.pack]));
+   L.appendChild(h('h2', '', T.title));
+   L.appendChild(h('p', 'explain', T.explain(this.noun)));
+   const hn = h('div', 'hints');
+   [['▲▼', T.hChoose], ['OK', T.hUse], ['▶', T.hPrev], ['⟵', T.hBack]].forEach(x => { const d = h('div'); d.appendChild(h('b', '', x[0])); d.appendChild(document.createTextNode(x[1])); hn.appendChild(d); });
+   L.appendChild(hn);
+   if (this.fs2) L.appendChild(h('div', 'count', T.count(this.rows().length)));
+   s.appendChild(L);
+   const R = h('div', 'right');
+   if (this.error) {
+    const e = h('div', 'err'); e.appendChild(h('h3', '', T.errT)); e.appendChild(h('p', '', T.errP));
+    const b = h('div', 'btns');
+    [['retry', T.retry], ['close', T.close]].forEach(x => { const bt = h('button', this.part === x[0] || (x[0] === 'retry' && this.part === 'row') ? 'f' : '', x[1]); bt.onclick = ev => { ev.stopPropagation(); active = this; this.part = x[0]; this.press('ok'); }; b.appendChild(bt); });
+    e.appendChild(b); R.appendChild(e);
+   } else {
+    if (this.missing) R.appendChild(h('div', 'notice', T.missing(this.stored, this.noun)));
+    if (!this.fs2) R.appendChild(h('div', 'count', T.count(this.rows().length)));
+    this.windowed(R);
+    const st = h('div', 'status', this.status || ''); st.setAttribute('aria-live', 'polite'); R.appendChild(st);
+   }
+   s.appendChild(R);
+  } else {
+   const sb = h('div', 'sb'); sb.appendChild(h('span', '', '09:41')); sb.appendChild(h('span', '', '▾ ▮ 82%')); s.appendChild(sb);
+   const ab = h('div', 'ab'); const back = h('button', '', '←'); back.setAttribute('aria-label', 'Back');
+   back.onclick = e => { e.stopPropagation(); active = this; this.part = 'row'; this.press('back'); };
+   ab.appendChild(back); const tt = h('div'); tt.appendChild(h('div', 't', T.title)); tt.appendChild(h('div', 's', T.app[this.pack])); ab.appendChild(tt); s.appendChild(ab);
+   s.appendChild(h('p', 'explain', T.explain(this.noun)));
+   const list = h('div', 'list'); this.windowed(list); s.appendChild(list);
+   const st = h('div', 'status', this.status || ''); st.setAttribute('aria-live', 'polite'); s.appendChild(st);
+  }
+  if (this.overlay) s.appendChild(this.overlayEl());
+  this.host.replaceChildren(s);
+  // Fit: show fewer rows until the screen holds them (a mockup stand-in for the real list's scrolling).
+  if (s.scrollHeight > s.clientHeight + 1 && this.capNow > 2) this.render(this.capNow - 1);
+ }
+}
+document.querySelectorAll('[data-screen]').forEach(host => { const sc = new Screen(host, CONFIG[host.dataset.screen]); screens.push(sc); if (!active) active = sc; });
+const KEYS = {ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok', Escape: 'back', Backspace: 'back'};
+document.addEventListener('keydown', e => { const k = KEYS[e.key]; if (k && active) { e.preventDefault(); active.press(k); } });
+document.querySelectorAll('[data-key]').forEach(b => b.onclick = () => { if (active) active.press(b.dataset.key); });
+document.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => { screens.forEach(s => s.reset()); fb('Reset: every screen back to the state this mockup shows first.'); });
+document.querySelectorAll('[data-note]').forEach(b => b.onclick = () => fb(b.dataset.note));
+"""
+
+REMOTE = """<div class="remote"><span>Remote (or the keyboard's arrows, Enter, Esc):</span>
+<button data-key="up">▲</button><button data-key="down">▼</button><button data-key="left">◀</button><button data-key="right">▶</button>
+<button data-key="ok">OK</button><button data-key="back">Back</button><button data-reset="1">Reset</button></div>"""
+
+
+def tv(name, scale, caption=""):
+    w, hgt = round(960 * scale), round(540 * scale)
+    cap = f'<p class="cap">{caption}</p>' if caption else ""
+    return (f'<div><div class="bezel"><div class="wrap" data-screen="{name}" style="width:{w}px;height:{hgt}px"></div></div>{cap}</div>')
+
+
+def phone(name, scale, caption=""):
+    w, hgt = round(412 * scale), round(892 * scale)
+    cap = f'<p class="cap">{caption}</p>' if caption else ""
+    return (f'<div><div class="bezel" style="border-radius:26px;padding:10px"><div class="wrap" data-screen="{name}" '
+            f'style="width:{w}px;height:{hgt}px;border-radius:16px"></div></div>{cap}</div>')
+
+
+def notes(items):
+    out = []
+    for title, bullets in items:
+        out.append(f"<h2>{title}</h2><ul>" + "".join(f"<li>{b}</li>" for b in bullets) + "</ul>")
+    return '<aside class="notes">' + "".join(out) + "</aside>"
+
+
+def page(file, title, kicker, body, config, first_feedback):
+    html = f"""<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>{title} · WorldFoundry screensaver chooser</title>
+<style>{CSS}</style>
+<main>
+<div class="kicker">{kicker}</div>
+<h1>{title}</h1>
+{body}
+<footer id="feedback">{first_feedback}</footer>
+</main>
+<script>
+const LEVELS = {json.dumps(LEVELS)};
+const CONFIG = {json.dumps(config)};
+{JS}
+</script>
+</html>
+"""
+    (HERE / file).write_text(html, encoding="utf-8")
+    print(f"wrote {file}: {len(html.encode())} bytes")
+
+
+K = "WorldFoundry · proposed design · not built"
+
+# 1. TV, opened from Homeboard, focus on the saved row.
+page("tv-saved.html", "TV: the chooser opened from Homeboard, the saved clock focused", K + " · state 1 of 5 (TV)",
+     '<div class="page"><div class="devices">' + tv("a", 1.1) + REMOTE + "</div>" + notes([
+         ("What you see", ["WF Clocks' own screen, opened by Homeboard's <b>Open WF Clocks settings</b> (Android's settingsActivity link).",
+                           "The radio dot and <b>Saved</b> mark the saved clock; focus starts on it.",
+                           "<b>Random</b> is first: the default when nothing is saved.",
+                           "No thumbnails: <b>Preview</b> (Right, then OK) plays the real level."]),
+         ("Try it", ["▲▼ move focus; nothing is saved until OK.", "OK saves at once; Undo appears on that row.",
+                     "Back leaves; the saved choice stays."]),
+     ]) + "</div>",
+     {"a": {"pack": "clocks", "stored": "tide_harbour", "focus": "tide_harbour", "scale": 1.1}},
+     "Opened from Homeboard. Focus is on the saved clock, Tide Harbour. Use the remote buttons or the keyboard.")
+
+# 2. TV, focus moved, Preview focused.
+page("tv-focus-preview.html", "TV: focus moved two rows down, Preview focused", K + " · state 2 of 5 (TV)",
+     '<div class="page"><div class="devices">' + tv("a", 1.1) + REMOTE + "</div>" + notes([
+         ("What changed", ["Focus moved from Tide Harbour to Cuckoo Village; <b>Tide Harbour is still saved</b>: moving saves nothing.",
+                           "Right moved focus onto the row's <b>Preview</b> button; only the focused row shows it on a TV.",
+                           "OK on Preview starts ScreensaverPreviewActivity with LEVEL=cuckoo_village: one run, nothing saved, as the coordinator's screensaver-show does."]),
+         ("Back from the preview", ["The preview ends (its process exits, as today); the chooser reads the saved choice again and focus returns to the row."]),
+     ]) + "</div>",
+     {"a": {"pack": "clocks", "stored": "tide_harbour", "focus": "cuckoo_village", "part": "preview", "scale": 1.1}},
+     "Focus is on Preview for Cuckoo Village. Tide Harbour stays saved. Press OK to see the preview, Back to end it.")
+
+# 3. TV, Random just saved, Undo offered.
+page("tv-random-undo.html", "TV: Random just saved, with Undo on its row", K + " · state 3 of 5 (TV)",
+     '<div class="page"><div class="devices">' + tv("a", 1.1) + REMOTE + "</div>" + notes([
+         ("What happened", ["OK on <b>Random</b> saved it at once (setSetting clock:random, through the app's own provider).",
+                            "The status line says what the screensaver will do and what was saved before.",
+                            "<b>Undo</b> sits on the row just saved (Right twice, then OK) until you leave; no timer."]),
+         ("Random", ["Each Dream start draws one clock from all 16; a repeat is possible.",
+                     "Preview on Random plays one drawn for that run."]),
+     ]) + "</div>",
+     {"a": {"pack": "clocks", "stored": "random", "prev": "tide_harbour", "undoRow": "random", "focus": "random",
+            "status": "Saved. The screensaver shows Random from its next start. Before: Tide Harbour.", "scale": 1.1}},
+     "Random was just saved; Tide Harbour was saved before. Undo is on the Random row: Right, Right, OK.")
+
+# 4. TV, the saved tank is gone from the roster.
+page("tv-missing.html", "TV: the saved tank is no longer in the app", K + " · state 4 of 5 (TV)",
+     '<div class="page"><div class="devices">' + tv("a", 1.1) + REMOTE + "</div>" + notes([
+         ("When it happens", ["An update dropped the saved tank from wflevels/aquarium-menu.manifest. Here the id is an example, aquarium_old_reef.",
+                              "The Dream already plays Random in this case (TankChoice.get); the chooser now says so instead of hiding it.",
+                              "Random is marked <b>Plays now</b>, not Saved: nothing valid is saved."]),
+         ("What is kept", ["The stored id is not rewritten on open. If the tank returns in a later update, the choice returns with it.",
+                           "Choosing any row saves it and the notice goes away. There is no Undo back to a missing tank."]),
+     ]) + "</div>",
+     {"a": {"pack": "aquarium", "stored": "aquarium_old_reef", "focus": "random", "scale": 1.1}},
+     "The saved tank is no longer in WF Aquarium. The screensaver plays Random until you choose; the stored id is kept.")
+
+# 5. TV, the provider could not be read.
+page("tv-error.html", "TV: the settings could not be read", K + " · state 5 of 5 (TV)",
+     '<div class="page"><div class="devices">' + tv("a", 1.1) + REMOTE + "</div>" + notes([
+         ("When it happens", ["The chooser reads the list and the saved choice from the app's own settings provider. If that call fails, the list is not guessed.",
+                              "Try again repeats the read; Close and Back leave. Nothing is written.",
+                              "The roster itself cannot be empty: LevelCatalog refuses a manifest with no levels at build time, so there is no empty list state."]),
+         ("A failed save", ["If a save fails, the status line says <i>Could not save. The screensaver still shows ‹name›.</i> and the marks stay where they were."]),
+     ]) + "</div>",
+     {"a": {"pack": "clocks", "stored": "tide_harbour", "focus": "tide_harbour", "error": True, "part": "retry", "scale": 1.1}},
+     "The provider did not answer. Try again is focused; Close leaves without changing anything.")
+
+# 6. Phone: Android's screen saver picker, the chooser, after a tap.
+SETTINGS_FRAME = """<div><div class="bezel" style="border-radius:26px;padding:10px"><div class="wrap" style="width:{w}px;height:{h}px;border-radius:16px">
+<div class="ph set" style="transform:scale({s})">
+<div class="sb"><span>09:41</span><span>▾ ▮ 82%</span></div>
+<div class="ab"><button data-note="Back to Display settings (Android's own screen, shown for context).">←</button><div><div class="t">Screen saver</div><div class="s">Android Settings · illustrative</div></div></div>
+<div class="hdr">Current screen saver</div>
+<div class="item"><span class="radio"></span><span class="n">Clock</span></div>
+<div class="item"><span class="radio"></span><span class="n">Photo frame</span></div>
+<div class="item"><span class="radio"></span><span class="n">Seahorse Grid</span></div>
+<div class="item on"><span class="radio"></span><span class="n">WF Clocks</span><button data-note="Android shows a settings gear for a screensaver that declares settingsActivity. WF Clocks now does, so the gear opens its chooser (the middle phone).">⚙</button></div>
+<div class="item"><span class="radio"></span><span class="n">World Foundry Aquarium Screensaver</span><button data-note="The Aquarium declares the same chooser, listing its tanks.">⚙</button></div>
+<div class="foot"><button data-note="Android starts the selected screensaver now; WF Clocks plays its saved clock.">Start now</button><button data-note="Android's own When to start setting; not ours.">When to start</button></div>
+<div class="hdr" style="padding-top:18px">Seahorse Grid has no gear: it has one scene, so it declares no chooser (decision D7).</div>
+</div></div></div><p class="cap">Android's picker (varies by version)</p></div>"""
+ps = 0.78
+page("phone.html", "Phone: from Android's screen saver picker to a saved choice", K + " · phone (Pixel, portrait)",
+     '<div class="page"><div class="devices"><div class="devrow">'
+     + SETTINGS_FRAME.format(w=round(412 * ps), h=round(892 * ps), s=ps)
+     + phone("a", ps, "The chooser, opened by the gear") + phone("b", ps, "After tapping Random")
+     + "</div></div>" + notes([
+         ("Touch", ["Tap a row: saved at once.", "▶ Preview on every row (no focus on a phone).",
+                    "Undo on the row just saved.", "← or the system Back returns to Settings."]),
+         ("Same code as the TV", ["One activity; a narrow screen stacks the title above the list.",
+                                  "Rotation follows the phone; only the Dream itself keeps landscape."]),
+         ("Try it", ["Tap rows, ▶ and Undo; tap a gear on the left."]),
+     ]) + "</div>",
+     {"a": {"pack": "clocks", "kind": "phone", "stored": "tide_harbour", "focus": "tide_harbour", "cap": 9, "top": True, "scale": ps},
+      "b": {"pack": "clocks", "kind": "phone", "stored": "random", "prev": "tide_harbour", "undoRow": "random", "focus": "random",
+            "status": "Saved. The screensaver shows Random from its next start. Before: Tide Harbour.", "cap": 9, "top": True, "scale": ps}},
+     "Left: Android's own screen saver picker shows a gear for WF Clocks. Middle: the chooser it opens. Right: after tapping Random.")
+
+# 7. Thai, long names, 2.0x font.
+page("thai-long.html", "Thai, long names and 2.0x text", K + " · languages and text size",
+     '<div class="page"><div class="devices"><div class="devrow">'
+     + tv("th", 0.68, "Thai, just after saving Tide Harbour. Level names stay as the manifest's English.")
+     + tv("big", 0.68, "English at 2.0x text: one column, actions under the name, long names wrap.")
+     + "</div>" + REMOTE + "</div>"
+     + "</div>" + notes([
+         ("Languages", ["The chooser's own words in English, Thai and Spanish (draft Thai to be reviewed).",
+                        "Level names come from the ASCII manifest and stay English."]),
+         ("Long names and 2.0x", ["The manifest allows 60 characters; the last right-hand row is a 60-character test name.",
+                                  "Names wrap, never cut off. At 1.5x text and above the left column folds into one header line.",
+                                  "Click a screen, then use the remote."]),
+     ]).replace('<aside class="notes">', '<aside class="notes" style="position:absolute;left:32px;right:32px;top:585px;columns:2;column-gap:32px">'),
+     {"th": {"pack": "clocks", "lang": "th", "stored": "tide_harbour", "prev": "random", "undoRow": "tide_harbour", "focus": "tide_harbour",
+             "status": "บันทึกแล้ว ภาพพักหน้าจอจะแสดง Tide Harbour ตั้งแต่ครั้งถัดไป ก่อนหน้า: สุ่ม", "cap": 5, "scale": 0.68},
+      "big": {"pack": "clocks_long", "stored": "tide_harbour", "focus": "sixty_char_test", "fs2": True, "cap": 3, "scale": 0.68}},
+     "Left: Thai. Right: 2.0x text with the 60-character test name focused. Click a screen to send it the remote's keys.")
