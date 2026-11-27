@@ -218,6 +218,11 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
 6. Cast1, missing level: save `corolla_gauge`; install a throwaway WF Clocks built from a manifest without it (the `-PwfClocksManifest` route of `task build-clocks-two-entry-apk`); open the chooser: the notice and "Plays now" on Random; trigger the Dream: a clock is drawn; reinstall the shipped APK: Corolla Gauge is saved again with no notice.
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
+
+    **Corrections (2026‑11‑27):**
+    - **The phone plays the screensaver only while charging** (Will: "screen saver on pixel won't start unless plugged in, too"). The gear, the chooser, its Preview, Back and rotation work on battery. `screensaver-show`, and any check that the screensaver starts by itself, needs the Pixel plugged in; unplugged, a failure to start is the phone's rule, not a chooser defect.
+    - **There is no Random row** (D4), so "tap Random" becomes: tap a clock other than the saved one.
+    - **The coordinator's phone input has no `uiautomator` dump**, so the spoken-text check reads the row text from the before/after frames, and the spoken text itself stays unverified until such a dump exists.
 9. Homeboard on Cast1 (closes Homeboard's [companion contract](../../../homeboard-tv/docs/plans/2026-11-26-screensaver-companion-contract.md) Verification 3): Homeboard's Screensaver list, WF Clocks, **Open WF Clocks settings** opens the chooser; choose a clock; Back returns to Homeboard with the WF Clocks entry focused; Homeboard's Preview of WF Clocks then plays the new choice. Seahorse Grid's entry shows no Open settings button. Record the result in that plan.
 
     ```
