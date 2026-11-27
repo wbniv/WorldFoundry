@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/fe58bb056) | Lava lamp poster, second layout after Will's review: no tags, Forth column |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/f787848b6) | Lava lamp A3 poster (Phase P): research first, a review draft for Will |
 
 <!--history-meta v1
+fe58bb056	author	Will Norris
+fe58bb056	added	2
+fe58bb056	deleted	4
+fe58bb056	files	1
+fe58bb056	body	Will (2026-11-27): "remove (verify) and (ours) tags... pretty-print the forth\nand put in a narrower, longer column; consider how to relayout".\n\n- No status tag is printed. The statuses still gate the build; a sourced\n  sentence ends in its superscript source number, and the footer says a\n  sentence without one is ours.\n- The Forth is a full-height side column: ll-env, ll-heat0 and ll-tick from\n  the shipped director, laid out by make_poster.pretty() (indented if/else/then,\n  a break after each store). Whitespace is the only change; the test checks\n  each block against lava_lamp.lev. Stack effects sit above the code.\n- Three columns, panels numbered in reading order, the render first and larger.\n- The plan's mockup bundle gains poster-v2 (the draft itself, with notes).\n\nStill a review draft: the visual review stays pending until Will approves.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqPBXQwjNMi8EXwe2or
 f787848b6	author	Will Norris
 f787848b6	added	25
 f787848b6	deleted	0

@@ -8,7 +8,7 @@ Every claim carries one label:
 - **other source**: read, but about another lamp, and used only as stated;
 - **ours**: our level, our model or our design; a measured number names the script that computes it.
 
-The labels gate the poster's build; the printed page shows none of them (Will, 2026‑11‑27). There a sourced sentence ends in its superscript source number, and the footer says that a sentence without one is ours.
+The labels gate the poster's build; the printed page shows none of them (Will, 2026‑11‑27). There a sourced sentence ends in its superscript source number; the footer is the numbered source list alone.
 
 What could not be confirmed is listed [at the end](#what-was-not-found-or-was-corrected) and is never printed.
 
@@ -83,7 +83,7 @@ All **verified**, from the page named in each line.
 
 ## The hero image
 
-**Ours.** `lava-lamp-poster/render_hero.py` renders the shipped scene, `wflevels/lava_lamp/lava_lamp.blend`, in CPU Cycles in the Blender container: each prelit surface becomes an emission of its baked shade times the tint the director writes, the wax is posed as on the engine's first frame (`model.warmed()` through `model.pose()`), Orange lava in Violet water, 21:47 in the base, the level's own camera and 60° view.
+**Ours.** `lava-lamp-poster/render_hero.py` renders the shipped scene, `wflevels/lava_lamp/lava_lamp.blend`, in CPU Cycles in the Blender container: each prelit surface becomes an emission of its baked shade times the tint the director writes, the wax is posed as on the engine's first frame (`model.warmed()` through `model.pose()`), Orange lava in Violet water, 16:40 in the base (Will, 2026‑11‑27), the level's own camera and 60° view.
 
 ## What was not found, or was corrected
 

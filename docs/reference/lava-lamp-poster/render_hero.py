@@ -11,7 +11,7 @@ The scene is prelit: every surface carries its shading in the `shade` colour lay
 vertex colour = tint x shade x glow (the Morph deformer, E1). So each material here becomes an emission of
 `shade`, multiplied by the object's colour, which this script sets to the tint and glow the director would write.
 The wax is posed as the engine poses it on its first frame: model.warmed() (the 150 s warm-up baked into the
-script) through model.pose(), with the default colours (Orange lava in Violet water) and 21:47 in the base.
+script) through model.pose(), with the default colours (Orange lava in Violet water) and 16:40 in the base.
 The camera is the level's: its position, its look-at point and the engine's fixed 60 degree vertical view, on a
 portrait frame, so the room crops at the sides as it does on a phone. No GPU and no GL: CPU Cycles only.
 """
@@ -29,7 +29,7 @@ import lamp as L  # noqa: E402
 import model as M  # noqa: E402
 
 OUT = HERE / 'hero-cycles.png'
-TIME = '2147'                       # the base shows 21:47, as the plan's mockups do
+WALL_HOUR, WALL_MINUTE = 16, 40     # Will (2026-11-27): "make time on lava lamp show 16:40"
 WIDTH, HEIGHT, SAMPLES = 720, 1080, 96
 
 
@@ -153,7 +153,9 @@ def main():
     if not blob_keys:
         print('render_hero: warning: the blob mesh carries no shape keys; morph weights not applied')
 
-    # the base: 21:47 in lit holes, the dashes hidden
+    # the base: the time in lit holes, the dashes hidden. As the director's ll-time does from WALL_HOUR and
+    # WALL_MINUTE: four digits, each one Digit<p>_<v> actor shown by its visibility; no mesh is edited.
+    TIME = f'{WALL_HOUR:02d}{WALL_MINUTE:02d}'
     for o in objs:
         if o.name.startswith('Digit'):
             p, v = o.name[5:].split('_')

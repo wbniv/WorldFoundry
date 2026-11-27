@@ -8,7 +8,7 @@
     "height": 1587.390625
   },
   "content_bottom_limit_px": 1557.154425,
-  "footer_last_bottom_px": 1549.234375,
+  "footer_last_bottom_px": 1554.234375,
   "footer_overflowing": false,
   "document_overflowing": false,
   "header_overflowing": false,
@@ -40,14 +40,14 @@
     },
     {
       "id": "panel-patents",
-      "clientHeight": 320,
-      "scrollHeight": 320,
+      "clientHeight": 356,
+      "scrollHeight": 356,
       "overflowing": false
     },
     {
       "id": "panel-forth",
-      "clientHeight": 1074,
-      "scrollHeight": 1074,
+      "clientHeight": 1110,
+      "scrollHeight": 1110,
       "overflowing": false
     },
     {

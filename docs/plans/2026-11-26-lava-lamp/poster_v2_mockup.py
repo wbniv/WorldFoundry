@@ -42,8 +42,9 @@ alt="The lava lamp A3 poster, second layout: the render and two text panels on t
 <div><h1>A3 poster, second layout (review draft)</h1>
 <p>Will, 2026‑11‑27: “remove (verify) and (ours) tags… pretty-print the forth and put in a narrower, longer column; consider how to relayout”.</p>
 <ul>
-<li><b>No status tags.</b> The verified / other source / ours statuses stay in <code>make_poster.py</code> as the build gate. On the page a sourced sentence ends in its superscript source number; the footer lists the numbers with links and says a sentence without one is ours.</li>
-<li><b>Forth in a tall side column</b>, the full height of the body: <code>ll-env</code>, <code>ll-heat0</code> (one blob’s step: heat, pooling, buoyancy, drift) and <code>ll-tick</code>, one definition per block, <code>if</code>/<code>else</code>/<code>then</code> indented, a break after each store. Whitespace is the only change from the shipped script; each block’s stack effect sits above it, outside the code.</li>
+<li><b>No status tags.</b> The verified / other source / ours statuses stay in <code>make_poster.py</code> as the build gate. On the page a sourced sentence ends in its superscript source number; the footer is the numbered source list with links, nothing else.</li>
+<li><b>Forth in a tall side column</b>, the full height of the body: <code>ll-env</code>, <code>ll-heat0</code> (one blob’s step: heat, pooling, buoyancy, drift) and <code>ll-tick</code>, one definition per block, <code>if</code>/<code>else</code>/<code>then</code> indented, a break after each store. Each level mailbox number is shown by its name from <code>lamp.py</code> (<code>BLOB0_STUCK</code>, <code>STARTED</code>, <code>P1</code>); mapping the names back gives the shipped script, whitespace aside. Each block’s stack effect sits above it, outside the code.</li>
+<li><b>The base shows 16:40</b> in the Cycles render.</li>
 <li><b>Three columns:</b> the render leads at the top left (01), then how it moves (02) and what is in the bottle (03); the history (04) and the six patents with QR codes (05) span the two left columns; the Forth (06) and the four ways to move the wax (07) fill the right.</li>
 <li>One A3 page, nothing under 8.25&nbsp;pt, no panel overflowing (<code>layout-review.json</code>).</li>
 </ul></div></div>

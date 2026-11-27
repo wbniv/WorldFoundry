@@ -275,7 +275,7 @@ def initial_words(lamp: M.Lamp) -> List[str]:
             sets.append(f"{lit(b[f])} {put(i, f)}")
     for c, v in ((L.P1, lamp.p1), (L.P2, lamp.p2), (L.P3, lamp.p3)):
         sets.append(f"{lit(v)} {wr(c)}")
-    return [": ll-start " + " ".join(sets) + f" 0 {wr(L.ACC)} 1 {wr(L.BLOB0 + 9)} ;"]
+    return [": ll-start " + " ".join(sets) + f" 0 {wr(L.ACC)} 1 {wr(L.STARTED)} ;"]
 
 
 def definitions(ix: Dict[str, int], fields: Dict[str, int], cam0=(0.0, 12.8), lamp: M.Lamp | None = None) -> str:
@@ -283,7 +283,7 @@ def definitions(ix: Dict[str, int], fields: Dict[str, int], cam0=(0.0, 12.8), la
     lines = ["\\ Lava lamp director: the wax model of model.py with merges, the base holes, the settings."]
     lines += smooth_words() + model_words() + pose_words(ix) + palette_words() + settings_words(ix, fields)
     lines += time_words() + camera_words(ix, fields, cam0) + initial_words(lamp)
-    lines.append(f": ll-tick {rd(L.BLOB0 + 9)} 0 = if ll-start then ll-settings ll-frame ll-pose ll-time ll-camera ;")
+    lines.append(f": ll-tick {rd(L.STARTED)} 0 = if ll-start then ll-settings ll-frame ll-pose ll-time ll-camera ;")
     return "\n".join(lines)
 
 

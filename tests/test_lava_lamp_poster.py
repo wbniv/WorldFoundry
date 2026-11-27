@@ -12,7 +12,8 @@ What it pins:
   * the committed poster.html, its SVG drawings and its QR codes are what the generators make now;
   * the model's numbers and the Forth words on the page are the level's: the words are found in the shipped .lev;
   * no status tag is printed (Will, 2026-11-27): a sourced sentence ends in superscript source numbers;
-  * the Forth is pretty-printed with whitespace the only change from the shipped script;
+  * the Forth is pretty-printed, each level cell number shown by its lamp.py name; mapping the names back gives the
+    shipped script, whitespace aside;
   * type is at least 8 pt, SVG text contrast at least 4.5 : 1, numbers keep a non-breaking space before their unit,
     ISO dates use non-breaking hyphens, no 12-hour clock, nothing external, links are the sources and the patents;
   * the exported layout fits one A3 page and the PDF is one 297 x 420 mm page (skipped until exported).
@@ -167,14 +168,37 @@ def test_the_forth_on_the_poster_is_the_shipped_script(built):
     lev = LEV.read_text(encoding="utf-8", errors="replace")
     blocks = re.findall(r'<pre class="code" data-word="([^"]+)">(.*?)</pre>', built[0], re.S)
     assert [w for w, _ in blocks] == list(mp.FORTH_WORDS)
+    names = mp.mailbox_names()
+    number = {v: k for k, v in names.items()}
+    used = set()
     for (word, body), shipped in zip(blocks, mp.forth_lines()):
         printed = htmllib.unescape(body)
         assert "<" not in body, word
-        assert " ".join(printed.split()) == shipped, word
+        toks = printed.split()
+        # every name stands before read-mailbox / write-mailbox and maps back to its number
+        back = []
+        for i, t in enumerate(toks):
+            if t in number:
+                assert toks[i + 1] in mp.MAILBOX_OPS, (word, t)
+                used.add(t)
+                back.append(str(number[t]))
+            else:
+                back.append(t)
+        assert " ".join(back) == shipped, word
         assert shipped in lev, word
+        assert not re.search(r"\b\d+ (read|write)-mailbox", printed), f"{word}: a raw mailbox number is printed"
         assert len(printed.splitlines()) > 1, f"{word} is not pretty-printed"
         assert max(len(x) for x in printed.splitlines()) <= mp.CODE_COLS, word
-    pretty = mp.pretty(": t 1 if 2 else 3 then 4 5 write-mailbox ;")
+    L = mp.LAMP
+    for t in used:
+        n = number[t]
+        if t.startswith("BLOB"):
+            i, field = re.fullmatch(r"BLOB(\d+)_(\w+)", t).groups()
+            assert n == L.BLOB0 + L.BLOB_STRIDE * int(i) + [f.upper() for f in L.BLOB_FIELDS].index(field), t
+        else:
+            assert n == getattr(L, t), t
+        assert f"{n} read-mailbox" in lev or f"{n} write-mailbox" in lev, t
+        pretty = mp.pretty(": t 1 if 2 else 3 then 4 5 write-mailbox ;")
     assert pretty == [": t", "  1 if", "    2", "  else", "    3", "  then", "  4 5 write-mailbox", ";"], pretty
 
 
@@ -213,7 +237,7 @@ def test_the_html_is_self_contained_and_links_only_sources(built):
 
 def test_no_status_tag_is_printed_and_sources_are_numbered(built):
     """Will (2026-11-27): no printed verified / ours tags. The statuses stay the build gate; on the page a sourced
-    sentence ends in its superscript source numbers and the footer says an unnumbered sentence is ours."""
+    sentence ends in its superscript source numbers; the footer is the source list alone."""
     doc = built[0]
     page = " ".join(text_nodes(doc))
     assert 'class="chip' not in doc
@@ -225,7 +249,11 @@ def test_no_status_tag_is_printed_and_sources_are_numbered(built):
     for _, c in mp.all_claims():
         if c["src"]:
             assert f'{mp.polish(c["text"])}<sup class="ref">{",".join(str(num[s]) for s in c["src"])}</sup>' in doc, c["text"][:40]
-    assert "a sentence without one is ours" in page
+    # Will (2026-11-27): the footer is the numbered source list alone; its explanatory and colophon note stays out
+    for gone in ("A superscript number is the source", "a sentence without one is ours", "locators: docs/reference",
+                 "Drawings original", "our Cycles render. A3"):
+        assert gone not in page, gone
+    assert re.search(r'<footer id="panel-src"><div class="srcs">.*?</div></footer>', doc, re.S)
 
 
 # ── the exported page ────────────────────────────────────────────────────────

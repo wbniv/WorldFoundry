@@ -12,8 +12,10 @@ either, when a source's link is not in the research document, or (without --draf
 "Poster visual review: approved". A draft is marked as one on the page and exports to a review-draft PDF name.
 
 The statuses are the build gate only: the page prints no status tag (Will, 2026-11-27: "remove (verify) and (ours)
-tags"). A sourced sentence ends in its superscript source numbers, and the footer says an unnumbered one is ours.
-The Forth column prints shipped definitions pretty-printed by `pretty()`: whitespace is the only change.
+tags"). A sourced sentence ends in its superscript source numbers; the footer is the numbered source list alone
+(Will, 2026-11-27: the explanatory and colophon note removed). The Forth column prints shipped definitions laid out by
+`pretty()`, each level cell number shown by its lamp.py name (`named()`, Will: "give mailbox numbers actual NAMES"):
+whitespace and those names are the only changes.
 
 The level's numbers are not typed here: the blob count, the model's character and the Forth words are read from
 wflevels/lava_lamp (model.py, lamp.py, forth.py) when the poster builds. The hero image is hero-cycles.png
@@ -50,7 +52,7 @@ WIDE = 1062                     # the page's inner width, px (281 mm at 96 px pe
 GAP = 10                        # between panels
 HERO_COL, MID, SIDE = 352, 398, 292   # three columns: the hero, the text, the Forth (352 + 398 + 292 + 2 gaps = 1062)
 HERO_W = 344                    # the render's printed width, px (2:3)
-BODY_H = 1304                   # the three columns, below the header and above the sources
+BODY_H = 1340                   # the three columns, below the header and above the sources
 ROW1_H = 712                    # the hero beside panels 01 and 02
 MOVES_PANEL_H = 366
 HIST_H = 250
@@ -99,6 +101,28 @@ FORTH_NOTES = {   # word: (stack effect, what it does); printed beside the code,
     'll-heat0': ('( -- )', 'blob 0, one step: heat, pool, buoy, drift'),
     'll-tick': ('( -- )', 'the director, every frame'),
 }
+
+
+def mailbox_names():
+    """{cell number: name} for the level's own mailboxes, from wflevels/lava_lamp/lamp.py (the level's cell table; these
+    cells are level user mailboxes, not in the engine's mailbox.inc). Blob i's fields are BLOBi_X ... BLOBi_B."""
+    names = {}
+    for i in range(MODEL.N_BLOBS):
+        for k, f in enumerate(LAMP.BLOB_FIELDS):
+            names[LAMP.BLOB0 + LAMP.BLOB_STRIDE * i + k] = f'BLOB{i}_{f.upper()}'
+    names.update({LAMP.STARTED: 'STARTED', LAMP.P1: 'P1', LAMP.P2: 'P2', LAMP.P3: 'P3', LAMP.ACC: 'ACC'})
+    return names
+
+
+MAILBOX_OPS = ('read-mailbox', 'write-mailbox')
+
+
+def named(definition: str) -> str:
+    """The shipped definition with each level cell number before read-mailbox / write-mailbox shown by its name."""
+    names, toks = mailbox_names(), definition.split()
+    out = [names[int(t)] if t.isdigit() and i + 1 < len(toks) and toks[i + 1] in MAILBOX_OPS and int(t) in names else t
+           for i, t in enumerate(toks)]
+    return ' '.join(out)
 
 
 def forth_lines():
@@ -168,7 +192,7 @@ PANELS = [
     dict(key='bottle', title='What is in the bottle', claims=[]),     # a table: BOTTLE_ROWS
     dict(key='hero', title='The lamp in this clock', claims=[
         dict(status='ours', src=[], by='render_hero.py', chip='ours',
-             text=f'The shipped scene in Cycles: {D["blobs"]} blobs posed as on the engine’s first frame, Orange in Violet, 21:47 in the base.'),
+             text=f'The shipped scene in Cycles: {D["blobs"]} blobs posed as on the engine’s first frame, Orange in Violet, 16:40 in the base.'),
         dict(status='other-source', src=['hpm'],
              text='The US Lava Lite Century’s gold base “is perforated with tiny holes which simulate starlight”.'),
         dict(status='ours', src=[], by='generate.py', chip='design (ours)',
@@ -184,7 +208,8 @@ PANELS = [
         dict(status='ours', src=[], by='forth.py',
              text=f'Copied from the level’s director, which a generator writes from the Python model in 32-bit floats; a test runs '
                   f'both step for step in the real zForth VM. Blob <i>i</i> lives in mailboxes {D["cell0"]}&nbsp;+&nbsp;{D["stride"]}<i>i</i>; '
-                  f'a frame runs whole 1/30 s steps, at most {D["steps"]}. Only the line breaks are ours.'),
+                  f'a frame runs whole 1/30 s steps, at most {D["steps"]}. The line breaks and names are ours; a name stands for its '
+                  f'mailbox: BLOB0_X…BLOB0_B {D["cell0"]}…{D["cell0"] + 8}, STARTED {LAMP.STARTED}, P1, P2 {LAMP.P1}, {LAMP.P2}.'),
         dict(status='ours', src=[], by='model.character()', chip='ours (measured)',
              text=f'Over 20 simulated minutes the {D["blobs"]} blobs spend {D["pooled"]:.0f} % of their time pooled on the coil, '
                   f'{D["resting"]:.0f} % resting under the cap and {D["moving"]:.0f} % moving; a cycle takes about {D["cycle"]:.0f} s. Game tuning, not a measured lamp.'),
@@ -419,7 +444,7 @@ def pretty(definition: str, width: int = CODE_COLS) -> list:
 
     units = []                      # a cell number stays with its read-mailbox or write-mailbox
     for t in toks[2:-1]:
-        if t in ('read-mailbox', 'write-mailbox') and units and re.fullmatch(r'\d+', units[-1]):
+        if t in MAILBOX_OPS and units and re.fullmatch(r'[0-9A-Z_]+', units[-1]):
             units[-1] += ' ' + t
         else:
             units.append(t)
@@ -431,8 +456,9 @@ def pretty(definition: str, width: int = CODE_COLS) -> list:
             if t == 'else':
                 depth += 1
             continue
-        if buf and len('  ' * depth + ' '.join(buf + [t])) > width:
-            flush()
+        if buf and (len('  ' * depth + ' '.join(buf + [t])) > width or
+                    (' ' in t and t.split()[-1] in MAILBOX_OPS and len('  ' * depth + ' '.join(buf)) > width // 2)):
+            flush()                 # wrap, or start a mailbox read on a fresh line once this one is half full
         buf.append(t)
         if t == 'if':
             flush()
@@ -479,7 +505,7 @@ def bottle_html(num, svg):
 def hero_html(p, num):
     img = base64.b64encode((HERE / 'hero-cycles.png').read_bytes()).decode('ascii')
     return (f'<img class="hero" src="data:image/png;base64,{img}" width="{HERO_W}" height="{HERO_W * 3 // 2}" '
-            f'alt="The lava lamp clock rendered in Cycles: a gold Astro, orange wax in violet liquid, 21:47 in the holes of its base">'
+            f'alt="The lava lamp clock rendered in Cycles: a gold Astro, orange wax in violet liquid, 16:40 in the holes of its base">'
             + claims_html(p, num))
 
 
@@ -514,7 +540,7 @@ def forth_html(p, num):
     blocks = []
     for word, ln in zip(FORTH_WORDS, forth_lines()):
         effect, what = FORTH_NOTES[word]
-        body = '\n'.join(esc(x) for x in pretty(ln))
+        body = '\n'.join(esc(x) for x in pretty(named(ln)))
         blocks.append(f'<div class="fw"><div class="fh"><span class="fwhat">{esc(what)}</span><span class="fx">{esc(effect)}</span></div>'
                       f'<pre class="code" data-word="{word}">{body}</pre></div>')
     return ''.join(blocks) + claims_html(p, num)
@@ -542,8 +568,7 @@ def footer_html(num):
     per = -(-len(lis) // 3)
     cols = ''.join(f'<ol>{"".join(lis[i * per:(i + 1) * per])}</ol>' for i in range(3))
     return (f'<footer id="panel-src"><div class="srcs">{cols}</div>'
-            f'<div class="note">A superscript number is the source of the sentence it ends; a sentence without one is ours (the level, its model, its design). '
-            f'Checked {CHECKED}; locators: docs/reference/lava-lamp-research.md. Drawings original; lamp: our Cycles render. A3, 297 × 420 mm.</div></footer>')
+            '</footer>')
 
 
 CSS = f"""

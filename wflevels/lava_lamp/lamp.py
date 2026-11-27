@@ -33,6 +33,7 @@ def globe_r(y: float) -> float:
 BLOB0, BLOB_STRIDE = 100, 10
 BLOB_FIELDS = ("x", "y", "vx", "vy", "r", "T", "stuck", "a", "b")
 P1, P2, P3, ACC = 190, 191, 192, 193
+STARTED = BLOB0 + 9          # the director has run ll-start (blob 0's tenth cell, after its nine fields)
 BLOCK_BLOB0 = 400             # deform blocks, 10 cells each: six weights, tint R G B, glow
 BLOCK_MERGED0 = 480
 BLOCK_POOL = 520
