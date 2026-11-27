@@ -10,7 +10,7 @@ Every claim carries one label:
 
 The labels gate the poster's build; the printed page shows none of them (Will, 2026‑11‑27). There a sourced sentence ends in its superscript source number; the footer is the numbered source list alone.
 
-What could not be confirmed is listed [at the end](#what-was-not-found-or-was-corrected) and is never printed.
+Poster visual review: approved (Will, 2026‑11‑27: "poster ok"). `make_poster.py` now builds the final poster without `--draft`.
 
 Poster visual review: pending (Will). Until Will approves and this line is changed to say so, `make_poster.py` builds only a marked review draft.
 
