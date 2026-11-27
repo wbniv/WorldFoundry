@@ -275,6 +275,28 @@ Builds and device runs happen only after Will's decisions; device jobs go throug
     caveat above. Follow-up for the coordinator: HOME and BACK `press` jobs did not move WF Clocks' preview screen
     out of the foreground, which blocked `install` with `install-over-foreground`.
 7. Cast2 (4K) and Cast1 at 2.0x text: the same capture as step 5's first frame; the layout matches mockups 1 and 7 (no cut-off names, title column folded at 2.0x). Restore Cast1's text size afterwards.
+
+    ```
+    $ task chromecast:platform-settings DEVICE=chromecast-test-01 CONTROL=font-scale              # J-e974da49e1f1: "1.0"
+    $ task chromecast:platform-settings DEVICE=chromecast-test-01 CONTROL=font-scale VALUE=2.0    # J-86887117808a
+    $ task chromecast:check DEVICE=chromecast-test-01 APP=homeboard-tv \
+        APK=artifacts/deployments/0.1.177/homeboard.apk RECIPE=dev/device/chooser-layout-check.json   # J-48d79f664d80
+    $ task chromecast:platform-settings DEVICE=chromecast-test-01 CONTROL=font-scale VALUE=1.0    # J-c2bd8fc5f5f2: "1.0"
+    $ task chromecast:screensaver:install DEVICE=chromecast-test-02 \
+        APK=~/tmp/wf-apk-frozen/screensaver-clocks-release-a66b87250.apk                         # J-dfacc920fa22 completed
+    $ task chromecast:check DEVICE=chromecast-test-02 … RECIPE=dev/device/chooser-layout-check-cast2.json  # J-9dd7c4a173b7
+      HomeboardDashboard: dashboard=3840x2160 surface=3840x2160 (captures are 1920x1080)
+    ```
+
+    **PASS with two defects (2026‑11‑27).** Cast1 at 2.0x: the title column folds above the list, Saved and Preview
+    wrap under the name, nothing is clipped at the sides (mockup 7). Cast2 at 4K: two columns as mockup 1, every name
+    whole, the status line and key hints in place.
+    - **Defect, 2.0x:** after Down, the newly focused row (Moon Lantern) sits half under the bottom fade with its
+      Preview pill partly hidden; the list should scroll the focused row fully into view.
+    - **Defect, Cast2:** when focus moves from a row to its Preview pill, the title column narrows and the whole list
+      shifts left (frame 04 against 03); Down to the next row restores it. Focus changes should not reflow the columns.
+    - Cast1's font scale is back at 1.0. A first Cast2 run (`J‑794c9d27ddc6`) pressed one Down too many and opened
+      the Aquarium's "Use everywhere" setup screen, which changes nothing.
 8. Pixel (`DEVICE=phone-pixel-8-pro`): Settings, Display, Screen saver: the gear beside WF Clocks opens the chooser; tap Random; Preview plays; system Back returns to Settings; rotate the phone while the chooser is open (the list keeps the saved mark); `task chromecast:screensaver-show` plays the saved choice. A `uiautomator` dump in the same recipe shows each row's spoken text ("Tide Harbour, saved, 3 of 17").
 
     **Corrections (2026‑11‑27):**

@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/4b0f203ba) | plan: chooser steps 5 and 6 pass on Cast1 |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/69875b7a1) | plan: chooser step 6 partial on Cast1: notice and drawn clock pass; shipped reinstall refused |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/ce5f3ea8b) | plan: chooser step 5 partial: Cast1's Dream plays the saved clock |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/9146728df) | plan: chooser step 8 deferred; why the coordinator cannot drive Settings on the Pixel |
@@ -11,6 +12,11 @@
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/88befddc5) | Plan: Aquarium and Clocks screensaver chooser behind the Dream's settings link |
 
 <!--history-meta v1
+4b0f203ba	author	Will Norris
+4b0f203ba	added	26
+4b0f203ba	deleted	0
+4b0f203ba	files	1
+4b0f203ba	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqP8zNDXFEqEEztS56o
 69875b7a1	author	Will Norris
 69875b7a1	added	20
 69875b7a1	deleted	0
