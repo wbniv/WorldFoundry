@@ -1,6 +1,6 @@
 # Retire the remaining GitHub Actions workflows
 
-**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. Phases 1–2 done (`57d753965`, `cc22ca5a0`); Phase 3 waits on the `wf-org-terraform` AWS profile.
+**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. Phases 1–3 done (`57d753965`, `cc22ca5a0`, worldfoundry.org `a2a7170`); Phase 4 (delete the unused GitHub secrets) waits on Will's "yes, delete".
 **TODO:** `[T4] Retire the remaining GitHub Actions workflows: local replacements first`.
 **Repos:** this one (`wbniv/WorldFoundry`, branch `2026-new-level`) and `~/worldfoundry.org`.
 
@@ -93,7 +93,7 @@ It runs the same scripts in the same order as the workflow, so the published rep
 
 ## Decisions for Will
 
-- **D1. Where the apt secrets live.** Today the R2 keys and the GPG private key are GitHub secrets, backed up to `r2://worldfoundry-secrets/`, with a local cache in `/tmp/worldfoundry-bootstrap.env`. Recommended: SSM `SecureString` under `/wf-org/apt/*`, read with the site's own `wf-org-terraform` profile. That profile is **missing on this machine**. Found 2026‑11‑27: `/wf-org/` *is* in the same AWS account as every other profile here (3531…3271), in **us-west-2** (`/wf-org/cloudflare/{api_token,account_id,email_destination}`, 2026‑05‑17); `wf-terraform` only missed it because its default region is us-east-1. The IAM user `wf-org-terraform` exists with one active key (2026‑05‑16), but no copy of that key is on this machine, so the profile needs a new access key. The apt secrets themselves (R2 keys, GPG key) are not in SSM yet: only in GitHub secrets (write-only) and the `r2://worldfoundry-secrets/` backup. Alternative: keep the R2 backup as the source and read it with a cached token, which keeps the secret outside SSM.
+- **D1. Where the apt secrets live.** Today the R2 keys and the GPG private key are GitHub secrets, backed up to `r2://worldfoundry-secrets/`, with a local cache in `/tmp/worldfoundry-bootstrap.env`. Recommended: SSM `SecureString` under `/wf-org/apt/*`, read with the site's own `wf-org-terraform` profile. That profile is **missing on this machine**. Found 2026‑11‑27: `/wf-org/` *is* in the same AWS account as every other profile here (3531…3271), in **us-west-2** (`/wf-org/cloudflare/{api_token,account_id,email_destination}`, 2026‑05‑17); `wf-terraform` only missed it because its default region is us-east-1. The IAM user `wf-org-terraform` exists with one active key (2026‑05‑16), but no copy of that key is on this machine, so the profile needs a new access key. **Resolved 2026‑11‑28** (Will: "you do"): a second key minted with `wf-terraform` and saved as the `wf-org-terraform` profile (us‑west‑2); the four apt secrets copied from the R2 backup into SSM `/wf-org/apt/*`. The apt secrets themselves (R2 keys, GPG key) are not in SSM yet: only in GitHub secrets (write-only) and the `r2://worldfoundry-secrets/` backup. Alternative: keep the R2 backup as the source and read it with a cached token, which keeps the secret outside SSM.
 - **D2. The Blender matrix.** The workflow tested several Blender versions to widen the add-on's apt version pin. Recommended: local CI tests only the host's Blender (the one in the `blender` image), and a separate `task blender-matrix` runs the other versions on demand before the pin is widened.
 - **D3. Alert channel for the Codemagic budget.** Recommended: keep PagerDuty, the existing channel, and add a desktop notification as well.
 - **D4. foundrylinux.org's own workflows** (`site-deploy`, `foundry-apt-publish`, `foundry-iso-publish`, `foundry-setup-test`, `audit-apt-repos-snapshot`; the nightly `site-deploy` has failed twice this week). The repo belongs to the `foundry-linux` organisation. Is it in scope? Recommended: a separate plan in that repo, because it has its own apt and ISO pipelines.
@@ -169,5 +169,29 @@ Nothing new on AWS: a few SSM `SecureString` parameters are free in the standard
 
     The fired list `["50"]` came from the old repo-root state file, which the installer copied. The PagerDuty key was read from SSM: no "not readable" line. Threshold dry run, `STATE_FILE=$(mktemp) BUDGET_MINUTES=1 DRY_RUN=1 scripts/codemagic-budget-run.sh`, crossed 80 % and 95 % with "would alert" and posted nothing. The desktop notification was not fired for real: that would page as well. **PASS.**
 4. `cd ~/worldfoundry.org && task apt:publish -- --dry-run` builds and signs with no upload; then a real `task apt:publish` ends with the Release/Packages.gz check and the smoke install passing, and [apt.worldfoundry.org/dists/stable/Release](https://apt.worldfoundry.org/dists/stable/Release) shows the new date.
+
+    ```
+    $ bash apt/scripts/publish.sh --dry-run      # second attempt, after the rootless --user fix
+    2026-11-28T03:51:22Z apt-publish: dry run: stopping before signing and upload; output in /home/will/worldfoundry.org/apt/public/
+    rc=0
+    $ bash apt/scripts/publish.sh
+    2026-11-28T03:52:15Z apt-publish: checking the live Release matches the live Packages.gz
+    2026-11-28T03:52:16Z apt-publish: consistent (attempt 1)
+    2026-11-28T03:52:16Z apt-publish: persisting dist/ to R2:worldfoundry-apt/.dist-cache/
+    2026-11-28T03:52:18Z apt-publish: smoke-installing worldfoundry-blender-editor-exporter in a clean ubuntu:26.04
+    ii  worldfoundry-blender-editor-exporter 0.2.1+git3fa94cbe-2foundry2 amd64        World Foundry Level Editor add-on for Blender
+    2026-11-28T03:56:48Z apt-publish: rebuilding foundrylinux.org packages page (/home/will/foundrylinux.org)
+    $ head -5 https://apt.worldfoundry.org/dists/stable/Release
+    Date: Sat, 28 Nov 2026 03:52:00 UTC
+    ```
+
+    Completeness gate: "15 local .debs, 15 live packages". Two deviations from the step as written: the dry run stops *before* signing (signing needs the private key, and a dry run should touch no secret beyond R2 read); and the first dry run failed at `mkdir /work/apt/.aptly: permission denied`, because under rootless Docker `--user 1000:1000` maps to a subordinate UID, fixed in `in-docker.sh` (`a2a7170`). The image is `Dockerfile.github`: the lab registry is unreachable from home. **PASS.**
 5. `ls .github/workflows ~/worldfoundry.org/.github/workflows` lists nothing.
+
+    ```
+    ls: cannot access '.github/workflows': No such file or directory
+    ls: cannot access '/home/will/worldfoundry.org/.github/workflows': No such file or directory
+    ```
+
+    **PASS.**
 6. `gh secret list -R wbniv/worldfoundry.org` and `gh secret list -R wbniv/WorldFoundry` list nothing that is still unused.
