@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-28](https://github.com/wbniv/WorldFoundry/commit/983419c6b) | plan, TODO: GitHub Actions retirement done (phase 4: unused secrets deleted) |
 | [2026-11-28](https://github.com/wbniv/WorldFoundry/commit/28d780fca) | plan: record the foundrylinux.org audit failure on the notify leg |
 | [2026-11-28](https://github.com/wbniv/WorldFoundry/commit/88d626c70) | plan, TODO: GitHub Actions retirement phase 3 done (apt publishes locally) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/4639d8c14) | plan: where worldfoundry.org's AWS secrets actually live (us-west-2, same account) |
@@ -10,6 +11,11 @@
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/0ecc10d09) | plan: retire the remaining GitHub Actions workflows (local CI steps, Codemagic timer, local apt publish) |
 
 <!--history-meta v1
+983419c6b	author	Will Norris
+983419c6b	added	18
+983419c6b	deleted	1
+983419c6b	files	1
+983419c6b	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqNTUqFTmHmqAtzA9X1
 28d780fca	author	Will Norris
 28d780fca	added	1
 28d780fca	deleted	1

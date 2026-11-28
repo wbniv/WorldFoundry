@@ -1,6 +1,6 @@
 # Retire the remaining GitHub Actions workflows
 
-**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. **Done 2026‑11‑28:** Phases 1–4 (`57d753965`, `cc22ca5a0`, worldfoundry.org `a2a7170`, GitHub secrets deleted); all six verification steps PASS. The foundrylinux.org notify leg waits on that repo's powerdevil audit failure.
+**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. **Done 2026‑11‑28:** Phases 1–4 (`57d753965`, `cc22ca5a0`, worldfoundry.org `a2a7170`, GitHub secrets deleted); all six verification steps PASS.
 **TODO:** `[T4] Retire the remaining GitHub Actions workflows: local replacements first`.
 **Repos:** this one (`wbniv/WorldFoundry`, branch `2026-new-level`) and `~/worldfoundry.org`.
 
@@ -185,7 +185,7 @@ Nothing new on AWS: a few SSM `SecureString` parameters are free in the standard
     Date: Sat, 28 Nov 2026 03:52:00 UTC
     ```
 
-    Completeness gate: "15 local .debs, 15 live packages". Two deviations from the step as written: the dry run stops *before* signing (signing needs the private key, and a dry run should touch no secret beyond R2 read); and the first dry run failed at `mkdir /work/apt/.aptly: permission denied`, because under rootless Docker `--user 1000:1000` maps to a subordinate UID, fixed in `in-docker.sh` (`a2a7170`). The image is `Dockerfile.github`: the lab registry is unreachable from home. The last leg, foundrylinux.org's `task packages-page`, then failed its own audit (`✗ unowned packages — build FAIL: libpowerdevilcore2 powerdevil-data`, exit 3), so its packages page was not redeployed and `publish.sh` stopped before "published". That is foundrylinux.org package data (two powerdevil packages no metapackage owns), not this pipeline; the dispatch it replaces would have hit the same failure. **PASS** for the apt publish; the notify leg waits on foundrylinux.org.
+    Completeness gate: "15 local .debs, 15 live packages". Two deviations from the step as written: the dry run stops *before* signing (signing needs the private key, and a dry run should touch no secret beyond R2 read); and the first dry run failed at `mkdir /work/apt/.aptly: permission denied`, because under rootless Docker `--user 1000:1000` maps to a subordinate UID, fixed in `in-docker.sh` (`a2a7170`). The image is `Dockerfile.github`: the lab registry is unreachable from home. The last leg, foundrylinux.org's `task packages-page`, then failed its own audit (`✗ unowned packages — build FAIL: libpowerdevilcore2 powerdevil-data`, exit 3), so its packages page was not redeployed and `publish.sh` stopped before "published". That is foundrylinux.org package data (two powerdevil packages no metapackage owns), not this pipeline; the dispatch it replaces would have hit the same failure. **PASS** for the apt publish. The notify leg was fixed 2026‑11‑28 in foundrylinux.org `b46182c` (the two packages listed as `out_of_catalogue`, plus a `node-deps` task because `site-build` lacked esbuild): audit `unowned=0`, packages page deployed.
 5. `ls .github/workflows ~/worldfoundry.org/.github/workflows` lists nothing.
 
     ```
