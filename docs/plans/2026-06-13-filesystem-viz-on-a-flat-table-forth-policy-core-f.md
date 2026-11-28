@@ -63,7 +63,7 @@ exposed as `spawn-template`), `fsn_despawn`+`g_fsn_spawned`+deferred-rebuild (`:
 New shared primitives (Phase 1 introduces; Phase 2 reuses):
 | Word | Sig | Job |
 |------|-----|-----|
-| `subtree-bytes` (C `fl_subtree_bytes`) | `(path,statBudget)→int64` | recursive byte sum (the metric FSN never had) — used by both views |
+| `subtree-bytes` (C `fl_subtree_bytes`) | `(path,statBudget)→int64` | recursive byte sum (the metric FSN never had) — used by both views. Since 2026‑11‑28 Filelight and Dome size the tree once with `fl_walk` (a tree over the stat budget still draws; `WF_FL_STAT_BUDGET`, `task check-fl-scan`); the treemap still uses `fl_subtree_bytes` |
 | `set-rotation` | `( actor revs -- )` | expose `SetRotation(Euler(0,0,revs))` (the `fsn_spawn_connector:170` path) so Forth aims a spawned actor |
 | `set-scale3` / `set-color3` | `( actor sx sy sz -- )` / `( actor 0xRRGGBB -- )` | 3-line Forth helpers over `write-actor-mailbox` (defined in each Director, or as bootstrap words) |
 

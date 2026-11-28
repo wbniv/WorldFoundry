@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-11-24](https://github.com/wbniv/WorldFoundry/commit/7ed6d60c5) | Check in Aquarium and Clocks development build inputs |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/9e4690e0f) | Cuckoo Village: Bavaria mode's reversed hands and parade checked on cast1 across 20:00 |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/b1fc0555a) | Cuckoo Village: Bavaria mode checked on cast1 (form row, Off is Classic, On shows the Bavarian parts) |
 | [2026-11-22](https://github.com/wbniv/WorldFoundry/commit/451d7adb4) | Cuckoo Village: Bavaria mode (reversed dial and parade, four Bavarian figures, chalet case, dome, lozenge frieze, maypole) |
@@ -8,6 +9,10 @@
 | [2026-11-21](https://github.com/wbniv/WorldFoundry/commit/c81446981) | Cuckoo Village plan: Bavaria mode, Christmas candles, Bavarian seasonal events |
 
 <!--history-meta v1
+7ed6d60c5	author	Will Norris
+7ed6d60c5	added	25
+7ed6d60c5	deleted	4
+7ed6d60c5	files	1
 9e4690e0f	author	Will Norris
 9e4690e0f	added	1
 9e4690e0f	deleted	1

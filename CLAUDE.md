@@ -12,7 +12,7 @@
 | Physics | Jolt |
 | Graphics | OpenGL (Linux/Android), Metal (iOS) |
 | Blender addon | Python (`wftools/wf_blender/`) |
-| CI/CD | Codemagic (iOS), GitHub Actions |
+| CI/CD | Codemagic (iOS); local CI (`scripts/local-ci.sh`, `wf-local-ci.timer`). No GitHub Actions (retired 2026‑11‑27) |
 | Build | Taskfile + CMake |
 
 ## Key Commands

@@ -1,5 +1,7 @@
 # The 22 unreachable built levels: tests, experiments and two real levels
 
+> **Update 2026‑11‑28:** Will kept `moon_site01` (upgraded) and the four filesystem levels (fixed); see the Decide list. The four "script error" screenshots below predate the 2026‑11‑27 script fix.
+
 This is the evidence for the TODO item **"[T5] Evaluate the 22 built levels no player can reach"**, gathered 2026‑11‑27. Will's framing (2026‑11‑27) is that "most of the things aren't real levels, they're just tests". So each id is classified first:
 
 - **fixture:** a test or script still loads it.
@@ -28,15 +30,15 @@ A fixture or experiment is judged only on two questions: is it still a useful te
 | `pilot_demo` | fixture | PILOT‑language script running in a level | ⚠ `tests/pilot/in_level_demo.pilot`, web‑build preload | yes, with Blender step | 2.4 MB | **keep** |
 | `condo_639_640_tour` | fixture | self‑walking tour; checks every room is entered; records `tour-639.mp4` (640×480) | ⚠ `tests/record_condo_639_tour.py`, ⚠ Taskfile `tour-condo-639`/`video-condo-639` | yes (needs Will's condo `.blend`) | 10.7 MB | **keep** |
 | `condo_639_640_touch` | experiment | two‑button touch camera profile for the condo | `tests/verify_condo_camera_touch.py` (manual), Taskfile `condo-touch`; no app ships the profile | yes (needs the `.blend`) | 10.7 MB | **retire** unless a phone build is planned |
-| `filesys` | experiment | FSN filesystem browser (Forth Director, C layout) | ⚠ `test_level_iff_carries_its_lvl.py`, ⚠ `check-filesys-rebuild.sh` | yes (script error: no towers) | 0.4 MB | **keep**, fix its script |
-| `filelight` | experiment | radial disk‑usage sunburst | lists only | yes (script error) | 0.4 MB | decide with filesys |
-| `treemap` | experiment | squarified disk‑usage treemap | lists only; Forth words in `scripting_zforth.cc` | yes (script error) | 0.2 MB | decide with filesys |
-| `dome` | experiment | the sunburst on a hemisphere | lists only | yes (script error: all black) | 0.3 MB | decide with filesys |
+| `filesys` | experiment | FSN filesystem browser (Forth Director, C layout) | ⚠ `test_level_iff_carries_its_lvl.py`, ⚠ `check-filesys-rebuild.sh` | yes (script error: no towers) | 0.4 MB | **keep and fix** (Will, 2026‑11‑28); scripts fixed 2026‑11‑27, Filelight/Dome scan fixed `94fb22fb9`, Level Settings `65d4ba3d3` |
+| `filelight` | experiment | radial disk‑usage sunburst | lists only | yes (script error) | 0.4 MB | **keep and fix** (Will, 2026‑11‑28); scripts fixed 2026‑11‑27, Filelight/Dome scan fixed `94fb22fb9`, Level Settings `65d4ba3d3` |
+| `treemap` | experiment | squarified disk‑usage treemap | lists only; Forth words in `scripting_zforth.cc` | yes (script error) | 0.2 MB | **keep and fix** (Will, 2026‑11‑28); scripts fixed 2026‑11‑27, Filelight/Dome scan fixed `94fb22fb9`, Level Settings `65d4ba3d3` |
+| `dome` | experiment | the sunburst on a hemisphere | lists only | yes (script error: all black) | 0.3 MB | **keep and fix** (Will, 2026‑11‑28); scripts fixed 2026‑11‑27, Filelight/Dome scan fixed `94fb22fb9`, Level Settings `65d4ba3d3` |
 | `mm_practice_blender` | experiment | Blender‑authored ramp, from the 2026‑04 authoring comparison | lists only | yes | 0.3 MB | **retire** |
 | `mm_practice_blender_rt` | experiment | Blender import→export round trip of it (lossless: identical frame) | lists only | yes | 0.2 MB | **retire** |
 | `marble-madness` | experiment | ROM‑decoded Marble Madness paths, six generators | web‑build preload; `marble-madness-2` reads its `.lev` | yes | 0.8 MB | **archive** (MM is low priority) |
 | `marble-madness-2` | experiment | MM physics copy with timer and goal | lists only | yes | 0.4 MB | **archive** |
-| `moon_site01` | real level | Artemis III Site 01 lunar terrain, lander, rovers | ⚠ the **web build's default level** | yes (script error) | 13.8 MB | **keep + upgrade** |
+| `moon_site01` | real level | Artemis III Site 01 lunar terrain, lander, rovers | ⚠ the **web build's default level** | yes (script error) | 13.8 MB | **keep + upgrade** (Will, 2026‑11‑28); Level Settings `65d4ba3d3`, on the site in v0.1.23 |
 | `seahorse_grid` | real level | 24 animated seahorses | ⚠ **ships** as the Seahorse Grid screensaver app | yes (already has the setting) | 2.8 MB | **keep** (Will, 2026‑11‑27); added to `SHIPPED_BY_APP` |
 
 In this table, "Lists only" means the backface‑cull test's tolerance table, `scripts/sweep_blender_levels.py`, a `run-*` Taskfile task and old plans. None of them would fail if the level went; they would only need the entry removed. Size counts tracked plus untracked files and leaves out symlinks into other levels.

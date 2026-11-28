@@ -1,11 +1,17 @@
 | Date | Change |
 |------|--------|
+| [2026-11-28](https://github.com/wbniv/WorldFoundry/commit/dcb412ca7) | TODO, review: Will keeps moon_site01 (upgrade) and the four fs-viz levels (fix) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/6f5886c07) | Level script guard: count known-broken scripts apart from failures; review page points at the fix |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/351be3175) | Classify Seahorse Grid as shipped by its screensaver app |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/cb251fec8) | Unreachable levels review: reframe as tests, experiments and two real levels (Will) |
 | [2026-11-27](https://github.com/wbniv/WorldFoundry/commit/22e3d6e66) | Unreachable levels: one-page review of the 22 with screenshots and suggested verdicts |
 
 <!--history-meta v1
+dcb412ca7	author	Will Norris
+dcb412ca7	added	2
+dcb412ca7	deleted	2
+dcb412ca7	files	1
+dcb412ca7	body	Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01YEenqNTUqFTmHmqAtzA9X1
 6f5886c07	author	Will Norris
 6f5886c07	added	7
 6f5886c07	deleted	7

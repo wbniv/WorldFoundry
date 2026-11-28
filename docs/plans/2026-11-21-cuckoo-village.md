@@ -177,6 +177,8 @@ Recommended Cuckoo Village settings:
 | Seasonal events | On / Off | On | Shows the dated [Bavarian events](#seasonal-events-bavaria-mode) (Nikolaus, Krampus, Fasching, Oktoberfest, maypole dressing). They appear only while Bavaria mode is on |
 | Bavaria mode | On / Off | Off | Switches the village and figures to the [Bavaria mode](#bavaria-mode) theme; layout, timeline, lighting and sound are unchanged |
 | Camera motion | Journey / Still | Journey | Slow village tour with performance views, or fixed wide establishing view |
+| Houses | 0–24 slider | 13 | Number of cottages shown; the clock tower remains |
+| Trees | 0–24 slider | 12 | Number of village trees shown |
 | Orientation | Existing shared orientation choices | Existing package default | Use the package's shared implementation |
 
 Do not expose test-only time overrides as customer settings. The companion plan owns the shared settings interface and Dream lifecycle.
@@ -190,6 +192,7 @@ Do not expose test-only time overrides as customer settings. The companion plan 
 | Window lights | **Built.** Off keeps every cottage window dark; `tests/test_cuckoo_village_settings_effect.py` |
 | Camera motion | **Built.** Still holds the wide establishing view from the front; same test |
 | Bavaria mode | **Built (2026‑11‑22).** The reversed dial and the reversed parade (one sign, read from the field, on the hands' angle and the figures' progress along the oval), the four Bavarian figures (cooper, dirndl, lederhosen, brewer) on the Classic figures' pivots as twin actors, the anti-clockwise numerals, the chalet case (carved front gable with stags, a vine round the dial, a carved balcony rail, pinecone weights), a green onion dome, a lozenge frieze with timber trim on six cottages, and a maypole. Not in it: the flower boxes (the **Detailed flowers** plan owns them) and the Bavaria-only lighting blend. Tests: `tests/test_cuckoo_village_bavaria.py`, `tests/test_cuckoo_village_bavaria_art.py`, and the director in the real VM (`verify_cuckoo_village_forth.py`) |
+| Houses, Trees | **Built.** The director hides cottages and trees past the count. Sliders since 2026‑11‑28 (they were plain numbers the TV form could not change; Will: "supposed to have sliders"); Cast1 [check](../diagnostics/cuckoo-sliders-cast1-2026-11-28/README.md): Houses 13 → 16, Trees 12 → 9 |
 | Candles all year | **Built.** Season in the director, a switch for the rest of the year; `tests/test_cuckoo_village_candles.py`, `test_cuckoo_village_forth.py` |
 | Seasonal events, Sound | **The field exists and the director has a reader word for it; nothing responds yet.** Each lands with its feature: the events, the audio |
 
