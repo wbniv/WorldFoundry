@@ -611,8 +611,15 @@ static int fsn_navigate() {
 // ---------------------------------------------------------------------------
 // Filelight helpers — structure only (the C side of the §6 split).
 
-// Recursive byte sum under `dir`. statBudget caps total stat() calls so a huge
-// tree can't stall a frame; when it bottoms out we stop descending.
+// One walk sizes the whole tree; the arcs are then laid out from memory.
+// Directories down to g_fl_maxDepth become FlNodes; anything deeper only adds
+// its bytes to its ancestor. statBudget caps total stat() calls so a huge tree
+// can't stall a frame. When it runs out the walk stops, and what was already
+// sized still lays out. (Before 2026-11-28 the root's own size walk spent the
+// whole budget and every child then measured 0 bytes, so a large tree drew only
+// the centre disk; the layout also re-walked each subtree at every depth.)
+// Recursive byte sum under `dir`, capped at statBudget stat() calls. The
+// treemap sizes each child with it (a fresh budget per directory).
 static int64_t fl_subtree_bytes(const std::string& dir, int& statBudget) {
     if (statBudget <= 0) return 0;
     int64_t total = 0;
@@ -626,46 +633,69 @@ static int64_t fl_subtree_bytes(const std::string& dir, int& statBudget) {
     return total;
 }
 
+struct FlNode {
+    std::string         path;
+    int64_t             bytes = 0;
+    std::vector<FlNode> kids;            // directories only; files fold into bytes
+};
+
+static bool g_fl_budgetHit = false;
+
+static int64_t fl_walk(FlNode& node, int depth, int& statBudget) {
+    std::vector<FsnEntry> entries;
+    fsn_scan(node.path, entries);           // skips hidden / '.' '..'; lstat; no symlinks
+    int64_t total = 0;
+    for (const FsnEntry& e : entries) {
+        if (statBudget <= 0) { g_fl_budgetHit = true; break; }
+        --statBudget;
+        if (!e.is_dir) { total += e.size; continue; }
+        if (depth < g_fl_maxDepth) {
+            node.kids.push_back(FlNode{ e.path, 0, {} });
+            FlNode& kid = node.kids.back();
+            kid.bytes = fl_walk(kid, depth + 1, statBudget);
+            total += kid.bytes;
+        } else {
+            FlNode deep{ e.path, 0, {} };   // below the drawn depth: bytes only
+            total += fl_walk(deep, depth + 1, statBudget);
+        }
+    }
+    node.bytes = total;
+    return total;
+}
+
 // Push the node's own row, then split its arc ∝ child subtree-bytes and recurse.
 // Depth 0 = the centre disk (full [0,1) turn). Loose files fold into the node's
 // size (the Filelight default: dirs fan, files don't get their own wedge).
-static void fl_subdivide(const std::string& path, int depth, float a0, float a1,
-                         int branchId, int64_t myBytes, int& statBudget) {
-    g_fl_segments.push_back(FlSeg{ depth, a0, a1, myBytes / 1024, branchId, path });
-    if (depth >= g_fl_maxDepth || (a1 - a0) < FL_MIN_REV || statBudget <= 0) return;
+static void fl_subdivide(FlNode& node, int depth, float a0, float a1, int branchId) {
+    g_fl_segments.push_back(FlSeg{ depth, a0, a1, node.bytes / 1024, branchId, node.path });
+    if (depth >= g_fl_maxDepth || (a1 - a0) < FL_MIN_REV) return;
 
-    std::vector<FsnEntry> entries;
-    fsn_scan(path, entries);
-    struct Kid { std::string path; int64_t bytes; };
-    std::vector<Kid> kids;
     int64_t total = 0;
-    for (const FsnEntry& e : entries) {
-        if (!e.is_dir) continue;            // files already folded into myBytes
-        int64_t kb = fl_subtree_bytes(e.path, statBudget);
-        kids.push_back(Kid{ e.path, kb });
-        total += kb;
-    }
+    for (const FlNode& k : node.kids) total += k.bytes;
     if (total <= 0) return;
-    std::sort(kids.begin(), kids.end(),
-              [](const Kid& a, const Kid& b) { return a.bytes > b.bytes; });  // biggest first
+    std::sort(node.kids.begin(), node.kids.end(),
+              [](const FlNode& a, const FlNode& b) { return a.bytes > b.bytes; });  // biggest first
 
     float a = a0;
-    for (const Kid& k : kids) {
+    for (FlNode& k : node.kids) {
         float span = (a1 - a0) * (float)((double)k.bytes / (double)total);
         if (span < FL_MIN_REV) break;       // cull the small tail (keeps the actor budget sane)
-        fl_subdivide(k.path, depth + 1, a, a + span,
-                     depth == 0 ? g_fl_branchCount++ : branchId, k.bytes, statBudget);
+        fl_subdivide(k, depth + 1, a, a + span, depth == 0 ? g_fl_branchCount++ : branchId);
         a += span;
     }
 }
 
 // Rebuild the segment table for the current root. Returns the row count.
+// WF_FL_STAT_BUDGET overrides the stat() cap (tests use a small one).
 static int fl_scan() {
     g_fl_segments.clear();
     g_fl_branchCount = 0;
+    g_fl_budgetHit = false;
     int statBudget = 200000;
-    int64_t rootBytes = fl_subtree_bytes(g_fl_root, statBudget);
-    fl_subdivide(g_fl_root, 0, 0.0f, 1.0f, 0, rootBytes, statBudget);
+    if (const char* env = getenv("WF_FL_STAT_BUDGET")) statBudget = atoi(env);
+    FlNode root{ g_fl_root, 0, {} };
+    fl_walk(root, 0, statBudget);
+    fl_subdivide(root, 0, 0.0f, 1.0f, 0);
     return (int)g_fl_segments.size();
 }
 
@@ -1155,7 +1185,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
             } else if (custom == 13) {
                 // fl-scan ( -- nSegments ) — rebuild the flat segment table for the root.
                 int n = fl_scan();
-                fprintf(stderr, "FL: scanned '%s' — %d segments\n", g_fl_root.c_str(), n);
+                fprintf(stderr, "FL: scanned '%s' — %d segments%s\n", g_fl_root.c_str(), n,
+                        g_fl_budgetHit ? " (stat budget spent: partial)" : "");
                 zf_push(ctx, (zf_cell)(float)n);
             } else if (custom == 14) {
                 // seg-depth ( i -- d )

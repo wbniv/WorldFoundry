@@ -1556,6 +1556,11 @@ tasks:
       - wflevels/aquarium_touch/aquarium_touch.lev
       - wflevels/aquarium_touch-standalone.iff
 
+  check-fl-scan:
+    desc: "Filelight/Dome scan regression: a tree over the stat budget still draws rings (container, dev engine)"
+    cmds:
+      - scripts/in-linux-container.sh scripts/check-fl-scan.sh
+
   condo-touch:
     desc: "Build the condo with Forth two-button touch camera controls"
     deps: [tools-build, condo-textures]
