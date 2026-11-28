@@ -9,8 +9,8 @@ TYPEHEADER(Cuckoo Village Settings,CuckooVillageSettings)
     TYPEENTRYINT32(Sound,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"The cuckoo call on the hour; the bird still bobs with sound off")
     TYPEENTRYINT32(Camera motion,,0,1,0,"Journey|Still",SHOW_AS_RADIOBUTTONS|SHOW_AS_LIVE,"Journey tours the village and holds the tower view at each quarter; Still stays on one wide view")
     TYPEENTRYINT32(Detailed flowers,,0,1,1,"",SHOW_AS_CHECKBOX|SHOW_AS_LIVE,"Detailed petunia geranium and edelweiss window boxes on the cottages and Off shows the simple blocks")
-    TYPEENTRYINT32(Houses,,0,24,13,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Number of cottages in the village; the clock tower remains")
-    TYPEENTRYINT32(Trees,,0,24,12,"",SHOW_AS_NUMBER|SHOW_AS_LIVE,"Number of village trees")
+    TYPEENTRYINT32(Houses,,0,24,13,"",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Number of cottages in the village; the clock tower remains")
+    TYPEENTRYINT32(Trees,,0,24,12,"",SHOW_AS_SLIDER|SHOW_AS_LIVE,"Number of village trees")
     PROPERTY_SHEET_FOOTER
 	@include global_settings.inc
 TYPEFOOTER

@@ -56,6 +56,17 @@ def test_the_seven_fields_have_the_plan_ranges_and_defaults_and_are_live():
         assert f["live"], f"{label} must be SHOW_AS_LIVE or the forms cannot edit it"
 
 
+
+SHOW_SLIDER = 2   # engine/runtime_property_presentation.hpp ShowSlider: the TV form changes it with Left/Right
+
+
+def test_houses_and_trees_are_sliders_the_tv_form_can_change():
+    # Will, 2026-11-28: "the cuckoo village was supposed to have sliders settings for houses and trees,
+    # not just display them". As SHOW_AS_NUMBER the TV form drew them as read-only numbers.
+    fields = {f["key"]: f for f in catalog()["fields"]}
+    for label in ("Houses", "Trees"):
+        assert fields[label]["show"] == SHOW_SLIDER, f"{label} must be SHOW_AS_SLIDER"
+
 GLOBAL_FIELDS = {"Show framerate"}   # oas/global_settings.inc: every settings type carries these
 
 
