@@ -1,0 +1,257 @@
+{
+ "workflow": "record",
+ "app": "clocks",
+ "panel": "require-hidden",
+ "warmup": 3,
+ "duration": 35,
+ "input_script": [
+  {
+   "at": 1.0,
+   "capture": "chooser-start"
+  },
+  {
+   "at": 1.35,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 1.7,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 2.05,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 2.4,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 2.75,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 3.1,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 3.45,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 3.8,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 4.15,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 4.5,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 4.85,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 5.2,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 5.55,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 5.9,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 6.25,
+   "key": "DPAD_UP",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 6.6,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 6.95,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 7.3,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 7.65,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 8.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 8.8,
+   "capture": "chooser-on-cuckoo"
+  },
+  {
+   "at": 9.3,
+   "key": "DPAD_CENTER",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 18.3,
+   "capture": "village"
+  },
+  {
+   "at": 18.8,
+   "key": "DPAD_CENTER",
+   "action": "hold",
+   "ms": 1300
+  },
+  {
+   "at": 20.8,
+   "capture": "settings-open"
+  },
+  {
+   "at": 21.2,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 21.6,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 22.0,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 22.4,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 22.8,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 23.2,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 23.6,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 24.6,
+   "capture": "houses-before"
+  },
+  {
+   "at": 25.1,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 25.6,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 26.1,
+   "key": "DPAD_RIGHT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 27.1,
+   "capture": "houses-after-right3"
+  },
+  {
+   "at": 27.5,
+   "key": "DPAD_DOWN",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 28.5,
+   "capture": "trees-before"
+  },
+  {
+   "at": 29.0,
+   "key": "DPAD_LEFT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 29.5,
+   "key": "DPAD_LEFT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 30.0,
+   "key": "DPAD_LEFT",
+   "action": "hold",
+   "ms": 60
+  },
+  {
+   "at": 31.0,
+   "capture": "trees-after-left3"
+  }
+ ]
+}
