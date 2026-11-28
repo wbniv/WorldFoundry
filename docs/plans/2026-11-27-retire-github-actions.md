@@ -1,6 +1,6 @@
 # Retire the remaining GitHub Actions workflows
 
-**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. Phases 1–3 done (`57d753965`, `cc22ca5a0`, worldfoundry.org `a2a7170`); Phase 4 (delete the unused GitHub secrets) waits on Will's "yes, delete".
+**Status:** approved (Will, 2026‑11‑27: "d1-d5: ok"); D1–D5 taken as recommended. **Done 2026‑11‑28:** Phases 1–4 (`57d753965`, `cc22ca5a0`, worldfoundry.org `a2a7170`, GitHub secrets deleted); all six verification steps PASS. The foundrylinux.org notify leg waits on that repo's powerdevil audit failure.
 **TODO:** `[T4] Retire the remaining GitHub Actions workflows: local replacements first`.
 **Repos:** this one (`wbniv/WorldFoundry`, branch `2026-new-level`) and `~/worldfoundry.org`.
 
@@ -195,3 +195,20 @@ Nothing new on AWS: a few SSM `SecureString` parameters are free in the standard
 
     **PASS.**
 6. `gh secret list -R wbniv/worldfoundry.org` and `gh secret list -R wbniv/WorldFoundry` list nothing that is still unused.
+
+    ```
+    $ gh secret delete … -R wbniv/worldfoundry.org   # Will, 2026‑11‑28: "yes delete"
+    deleted CLOUDFLARE_ACCOUNT_ID
+    deleted CLOUDFLARE_API_TOKEN
+    deleted FOUNDRYLINUX_DISPATCH_PAT
+    deleted GPG_PRIVATE_KEY
+    deleted R2_ACCESS_KEY_ID
+    deleted R2_ENDPOINT
+    deleted R2_SECRET_ACCESS_KEY
+    $ gh secret delete CODEMAGIC_API_TOKEN -R wbniv/WorldFoundry
+    deleted CODEMAGIC_API_TOKEN
+    $ gh secret list -R wbniv/worldfoundry.org; gh secret list -R wbniv/WorldFoundry
+    (no output)
+    ```
+
+    Backups: the apt secrets stay in SSM `/wf-org/apt/*` and `r2://worldfoundry-secrets/`; the Codemagic token in `~/.config/codemagic/token`. **PASS.**

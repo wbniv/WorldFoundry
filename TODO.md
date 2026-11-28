@@ -2,7 +2,6 @@
 
 ## Open
 
-- [wip T4] **Retire the remaining GitHub Actions workflows: local replacements first** (Will, 2026‑11‑27: "no more github actions"). **Phases 1–3 done:** neither repo has a workflow left (local CI steps `57d753965`, Codemagic timer `cc22ca5a0`, worldfoundry.org `task apt:publish` with secrets in SSM `/wf-org/apt/*`, `a2a7170`; first local publish 2026‑11‑28 passed). Left: Phase 4, delete the unused GitHub secrets (7 on wbniv/worldfoundry.org, `CODEMAGIC_API_TOKEN` on wbniv/WorldFoundry), waiting on Will's "yes, delete". [plan](docs/plans/2026-11-27-retire-github-actions.md)
 - **Camera collisions for authored journeys.** In Tulpenkade, test the moving camera and its near clipping plane against roofs, façades, awnings, bridge parts and both turning mills. Resolve an obstruction smoothly and rejoin the authored shot. Check mid-lap starts, clock jumps and Still/Journey switches. [Dutch village camera](docs/plans/2026-11-24-dutch-cuckoo-village.md#camera-and-controls)
 
 - **Dutch Cuckoo Village audio.** Add an original two-note cuckoo call and a Sound setting. On desktop and Android, synchronize each call with the bird’s bob, skip missed calls after resume or clock changes, and verify mute, volume and Dream audio focus. Will deferred sound changes on 2026-11-24. [Tulpenkade plan](docs/plans/2026-11-24-dutch-cuckoo-village.md)
@@ -257,6 +256,7 @@
 
 ## Done
 
+- ✅ 2026-11-28 — [retire-gha] no GitHub Actions left: local CI steps, Codemagic timer, `task apt:publish` (SSM), secrets deleted. See [plan](docs/plans/2026-11-27-retire-github-actions.md).
 - ✅ 2026-11-27 — [chooser-layout] 2.0x focused row scrolls fully into view (`6f37fb4fe`); Cast1 + Cast2 PASS, Cast2 reflow withdrawn. See [plan](docs/plans/2026-11-27-screensaver-chooser.md).
 - ✅ 2026-11-27 — [unreachable-level-scripts] 7 Director scripts compile again; FSN syscall ids; script guard; style links tracked. See [plan](docs/plans/2026-11-27-level-scripts-and-rebuilds.md).
 - ✅ 2026‑11‑27 — [clock-player-anchored] Cuckoo Village and Minute Machine Players anchored; never fall out of the room. Commit d70c29704.
