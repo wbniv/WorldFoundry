@@ -2,6 +2,7 @@
 
 ## Open
 
+- [T1] **Install Clocks, Aquarium and Seahorse Grid on the tablet once the coordinator bug is fixed.** All three failed on 2026‑11‑28/29 with `plugin-error` and no command run (filed: `~/chromecast-coordinator/docs/inbox/2026-11-29-tablet-install-plugin-error-no-commands.md`, `fd23a662`). Cast1, Cast2 and the Pixel have them. APKs: `~/tmp/wf-apk-frozen/screensaver-{clocks-release-d1aaa4ac0,aquarium-release-8bf85e672,seahorse-release-8bf85e672}.apk`. T1: known recipe, one submit per app.
 - **Camera collisions for authored journeys.** In Tulpenkade, test the moving camera and its near clipping plane against roofs, façades, awnings, bridge parts and both turning mills. Resolve an obstruction smoothly and rejoin the authored shot. Check mid-lap starts, clock jumps and Still/Journey switches. [Dutch village camera](docs/plans/2026-11-24-dutch-cuckoo-village.md#camera-and-controls)
 
 - **Dutch Cuckoo Village audio.** Add an original two-note cuckoo call and a Sound setting. On desktop and Android, synchronize each call with the bird’s bob, skip missed calls after resume or clock changes, and verify mute, volume and Dream audio focus. Will deferred sound changes on 2026-11-24. [Tulpenkade plan](docs/plans/2026-11-24-dutch-cuckoo-village.md)
