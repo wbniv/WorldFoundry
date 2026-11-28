@@ -64,9 +64,9 @@ In this table, "Lists only" means the backface‑cull test's tolerance table, `s
 
 - [ ] Fixtures (`teleport_regression`, `unloaded_actor_regression`, `mm_practice`, the four `style_*`, `aquarium_idle`, `snowgoons-blender`, `pilot_demo`, `condo_639_640_tour`): keep as useful tests (suggested), with `mm_practice` never recompiled / retire some (name them)
 - [ ] `condo_639_640_touch`: retire it along with its verify script and Taskfile task (suggested) / keep for a phone build
-- [ ] fs‑viz (`filesys`, `filelight`, `treemap`, `dome`): fix the `\\` script for all four / keep `filesys` and fix it, retire the other three (suggested) / retire all four and their Forth words
+- [x] fs‑viz (`filesys`, `filelight`, `treemap`, `dome`): **keep and fix all four** (Will, 2026‑11‑28: "filesys, filelight, treemap and dome: keep and fix")
 - [ ] `mm_practice_blender`, `mm_practice_blender_rt`: retire (suggested) / keep
 - [ ] `marble-madness`, `marble-madness-2`: archive, frozen (suggested) / retire (and drop MM from `WF_WEB_LEVELS`)
-- [ ] `moon_site01`: keep + upgrade (suggested) / other
+- [x] `moon_site01`: **keep + upgrade** (Will, 2026‑11‑28)
 - [x] `seahorse_grid`: keep, and add it to `SHIPPED_BY_APP` (Will, 2026‑11‑27; done)
 - [ ] The `wf`‑token Director error (`moon_site01`, `pilot_demo`, `snowgoons-blender`): open a fix item (suggested) / ignore
